@@ -18,16 +18,19 @@ HEADERS += \
     webrtc.h
 
 # Adding include paths for WebRTC and Opus
-INCLUDEPATH += C:\Users\Amirali\Desktop\UT\Network\Projects\lib\libdatachannel
-INCLUDEPATH += C:/Users/Amirali/Desktop/UT/Network/Projects/lib/opus/include
+INCLUDEPATH += D:\SHAHZAD\00UT\sems\sem7\07-ComputerNetworks\Projects\lib\libdatachannel
+INCLUDEPATH += D:\SHAHZAD\00UT\sems\sem7\07-ComputerNetworks\Projects\lib/opus/include
+INCLUDEPATH += D:\SHAHZAD\00UT\sems\sem7\07-ComputerNetworks\Projects\lib\libdatachannel\include\rtc
 
 # Linking with WebRTC library and Opus library
-LIBS += -LC:\Users\Amirali\Desktop\UT\Network\Projects\lib\libdatachannel/Windows/Mingw64 -ldatachannel.dll
-LIBS += -LC:/Qt/Tools/OpenSSLv3/Win_x64/bin -lcrypto-3-x64 -lssl-3-x64
-LIBS += -LC:/Users/Amirali/Desktop/UT/Network/Projects/lib/opus/Windows/Mingw64 -lopus
+LIBS += -LD:\SHAHZAD\00UT\sems\sem7\07-ComputerNetworks\Projects\lib\libdatachannel/Windows/Mingw64 -ldatachannel.dll
+LIBS += -LD:/Qt/Tools/OpenSSLv3/Win_x64/bin -lcrypto-3-x64 -lssl-3-x64
+LIBS += -LD:\SHAHZAD\00UT\sems\sem7\07-ComputerNetworks\Projects\lib\opus/Windows/Mingw64 -lopus
+LIBS += -LD:/SHAHZAD/00UT/sems/sem7/07-ComputerNetworks/Projects/lib/rtc/lib -lrtc
 
 # Add additional libraries for Windows
-LIBS += -lws2_32 -lssp
+LIBS += -lws2_32
+LIBS += -lssp
 
 # Disable stack protection to prevent "__stack_chk_fail" error
 QMAKE_CXXFLAGS += -fno-stack-protector
@@ -37,5 +40,8 @@ QMAKE_CFLAGS += -fno-stack-protector
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    resources.qrc
 
 QT += multimedia
