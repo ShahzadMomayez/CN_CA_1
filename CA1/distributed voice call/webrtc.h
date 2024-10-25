@@ -68,6 +68,7 @@ public Q_SLOTS:
     void setRemoteCandidate(const QString &peerID, const QString &candidate, const QString &sdpMid);
 
 private:
+
     QByteArray readVariant(const rtc::message_variant &data);
     QString descriptionToJson(const rtc::Description &description);
 
@@ -94,6 +95,8 @@ private:
     QMap<QString, std::shared_ptr<rtc::Track>>          m_peerTracks;
     QString                                             m_localDescription;
     QString                                             m_remoteDescription;
+    std::string desc;
+    std::vector <std::string> cand;
 
 
     Q_PROPERTY(bool isOfferer READ isOfferer WRITE setIsOfferer RESET resetIsOfferer NOTIFY isOffererChanged FINAL)

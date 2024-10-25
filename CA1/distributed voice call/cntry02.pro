@@ -26,7 +26,7 @@ INCLUDEPATH += D:\SHAHZAD\00UT\sems\sem7\07-ComputerNetworks\Projects\lib\libdat
 LIBS += -LD:\SHAHZAD\00UT\sems\sem7\07-ComputerNetworks\Projects\lib\libdatachannel/Windows/Mingw64 -ldatachannel.dll
 LIBS += -LD:/Qt/Tools/OpenSSLv3/Win_x64/bin -lcrypto-3-x64 -lssl-3-x64
 LIBS += -LD:\SHAHZAD\00UT\sems\sem7\07-ComputerNetworks\Projects\lib\opus/Windows/Mingw64 -lopus
-LIBS += -LD:/SHAHZAD/00UT/sems/sem7/07-ComputerNetworks/Projects/lib/rtc/lib -lrtc
+# LIBS += -LD:\SHAHZAD\00UT\sems\sem7\07-ComputerNetworks\Projects\lib\libdatachannel\Windows\Mingw64 -l
 
 # Add additional libraries for Windows
 LIBS += -lws2_32
@@ -35,6 +35,7 @@ LIBS += -lssp
 # Disable stack protection to prevent "__stack_chk_fail" error
 QMAKE_CXXFLAGS += -fno-stack-protector
 QMAKE_CFLAGS += -fno-stack-protector
+QMAKE_LFLAGS += -fuse-ld=lld
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

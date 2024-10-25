@@ -3,26 +3,31 @@
 #include <QDebug>
 #include "audioinput.h"
 #include "audiooutput.h"
+#include "webrtc.h"
 
 int main(int argc, char *argv[]) {
     QCoreApplication app(argc, argv);
 
 
-    QAudioDevice devinfo = QMediaDevices::defaultAudioInput();
-    if (devinfo.isNull()) {
-        qWarning() << "No default audio input found!";
-        return -1;
-    }
+    WebRTC webRTCInstance;
+    webRTCInstance.init("xjgfck", true);
 
-    AudioInput audioInput(devinfo);
-    AudioOutput audioOutput;
+    // QAudioDevice devinfo = QMediaDevices::defaultAudioInput();
+    // if (devinfo.isNull()) {
+    //     qWarning() << "No default audio input found!";
+    //     return -1;
+    // }
 
-    // Connect the audio input's newDataAvailable signal to audio output's addData slot
-    QObject::connect(&audioInput, &AudioInput::newDataAvailable, &audioOutput, &AudioOutput::addData);
+    // AudioInput audioInput(devinfo);
+    // AudioOutput audioOutput;
 
-    // STARTING recording and playback
-    audioInput.start();
-    audioOutput.start();
+
+    // // Connect the audio input's newDataAvailable signal to audio output's addData slot
+    // QObject::connect(&audioInput, &AudioInput::newDataAvailable, &audioOutput, &AudioOutput::addData);
+
+    // // STARTING recording and playback
+    // audioInput.start();
+    // audioOutput.start();
 
     return app.exec();
 }
