@@ -185,7 +185,7 @@ void WebRTC::generateAnswerSDP(const QString &peerId) {
         return;
     }
 
-    //TODO from Hatef do like Prev func
+    //TODO do like Prev func
 }
 
 
