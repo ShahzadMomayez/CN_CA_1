@@ -163,13 +163,7 @@ void WebRTC::generateOfferSDP(const QString &peerId)
         qWarning() << "Peer connection not found for" << peerId;
         return;
     }
-    if (m_gatheringComplited)
-    {
-        QString sdp = QString::fromStdString(peerConnection->localDescription()->generateSdp());
-        //TODO
-    }
-    else
-        peerConnection->setLocalDescription(rtc::Description::Type::Offer);
+    peerConnection->setLocalDescription(rtc::Description::Type::Offer);
 
 
 
@@ -184,8 +178,7 @@ void WebRTC::generateAnswerSDP(const QString &peerId) {
         qWarning() << "Peer connection not found for" << peerId;
         return;
     }
-
-    //TODO do like Prev func
+    peerConnection->setLocalDescription(rtc::Description::Type::Offer);
 }
 
 
@@ -238,6 +231,11 @@ void WebRTC::sendTrack(const QString &peerId, const QByteArray &buffer)
         // SET HEADER
         RtpHeader header;
         header.ssrc = qToBigEndian(m_ssrc);
+        header.first = 0x80;
+        header.marker = 0;
+        header.payloadType = m_payloadType;
+        header.sequenceNumber = qToBigEndian(++m_sequenceNumber);
+        header.timestamp = qToBigEndian(getCurrentTimestamp());
         // Convert QByteArray to rtc::binary
 
 
