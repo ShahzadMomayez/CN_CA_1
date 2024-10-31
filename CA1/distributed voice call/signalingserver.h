@@ -1,31 +1,26 @@
 #ifndef SIGNALINGSERVER_H
 #define SIGNALINGSERVER_H
-
 #include <QObject>
 #include <SocketIO/sio_client.h> // Make sure to link socket.io-client-cpp correctly
+#include <string>
 
-class signalingserver : public QObject
+class SignalingServer : public QObject
 {
     Q_OBJECT
 public:
-    explicit signalingserver(QObject *parent = nullptr);
-
-    // Connect to the signaling server
-    void connectToServer(const std::string &url);
-
-    // Send SDP and ICE candidate data to the server
-    void emitSDP(const std::string &sdp, const std::string &targetId);
-    void emitIceCandidate(const std::string &candidate, const std::string &targetId);
+    explicit SignalingServer(QObject *parent = nullptr);
+    void connectToServer(const std::string& url);
+    void sendSDP(const std::string& targetId, const std::string& sdp);
+    void sendICECandidate(const std::string& targetId, const std::string& candidate);
 
 signals:
-    // Signals to emit when we receive data from the server
-    void sdpReceived(const QString &sdp, const QString &senderId);
-    void iceCandidateReceived(const QString &candidate, const QString &senderId);
+    void sdpReceived(const std::string& senderId, const std::string& sdp);
+    void iceCandidateReceived(const std::string& senderId, const std::string& candidate);
 
 private:
-    sio::client h; // Socket.IO client instance
-    void onSDP(sio::event &event);
-    void onIceCandidate(sio::event &event);
+    sio::client socketClient;
+    void setupSocketHandlers();
 };
 
 #endif // SIGNALINGSERVER_H
+

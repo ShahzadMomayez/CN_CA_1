@@ -140,17 +140,27 @@ void WebRTC::addPeer(const QString &peerId)
     });
 
 
-    // Set up a callback for handling incoming tracks
     newPeer->onTrack([this, peerId](std::shared_ptr<rtc::Track> track) {
-        D<<"on track";
-        // track->onFrame([this, peerId](rtc::binary data, rtc::FrameInfo frame) {
-        //     const char* dataChar = reinterpret_cast<const char*>(data.data());
-        //     emit incommingPacket(peerId, QByteArray(dataChar, static_cast<int>(data.size())), data.size());
-        // });
+        track->onFrame([this, peerId](rtc::binary data, rtc::FrameInfo) {
+            const char* dataChar = reinterpret_cast<const char*>(data.data());
+            QByteArray receivedPacket(dataChar, static_cast<int>(data.size()));
+
+            if (receivedPacket.size() < static_cast<int>(sizeof(RtpHeader))) {
+                qWarning() << "Received packet is too small to contain an RTP header.";
+                return;
+            }
+
+            RtpHeader rtpHeader;
+            memcpy(&rtpHeader, receivedPacket.data(), sizeof(RtpHeader));
+
+            QByteArray audioPayload = receivedPacket.mid(sizeof(RtpHeader));
+
+            emit incommingPacket(peerId, audioPayload, audioPayload.size());
+            qDebug() << "Received audio frame from peer:" << peerId;
+        });
     });
 
-    // Add an audio track to the peer connection
-    this->addAudioTrack(peerId , "Shazad");
+
 
 }
 
@@ -164,11 +174,6 @@ void WebRTC::generateOfferSDP(const QString &peerId)
         return;
     }
     peerConnection->setLocalDescription(rtc::Description::Type::Offer);
-
-
-
-
-
 }
 
 // Generate an answer SDP for the peer
@@ -178,7 +183,9 @@ void WebRTC::generateAnswerSDP(const QString &peerId) {
         qWarning() << "Peer connection not found for" << peerId;
         return;
     }
-    peerConnection->setLocalDescription(rtc::Description::Type::Offer);
+
+
+    peerConnection->setLocalDescription(rtc::Description::Type::Answer);
 }
 
 
@@ -216,34 +223,37 @@ void WebRTC::addAudioTrack(const QString &peerId, const QString &trackName) {
 // Sends audio track data to the peer
 void WebRTC::sendTrack(const QString &peerId, const QByteArray &buffer)
 {
+    auto peerConnection = m_peerConnections.value(peerId);
+    if (!peerConnection) {
+        qWarning() << "Peer connection not found for" << peerId;
+        return;
+    }
 
-        auto peerConnection = m_peerConnections.value(peerId);
-        if (!peerConnection) {
-            qWarning() << "Peer connection not found for" << peerId;
-            return;
-        }
+    auto audioTrack = m_peerTracks.value(peerId);
+    if (!audioTrack) {
+        qWarning() << "Audio track not found for" << peerId;
+        return;
+    }
 
-        auto audioTrack = m_peerTracks.value(peerId);
-        if (!audioTrack) {
-            qWarning() << "Audio track not found for" << peerId;
-            return;
-        }
-        // SET HEADER
-        RtpHeader header;
-        header.ssrc = qToBigEndian(m_ssrc);
-        header.first = 0x80;
-        header.marker = 0;
-        header.payloadType = m_payloadType;
-        header.sequenceNumber = qToBigEndian(++m_sequenceNumber);
-        header.timestamp = qToBigEndian(getCurrentTimestamp());
-        // Convert QByteArray to rtc::binary
+    RtpHeader header;
+    header.ssrc = qToBigEndian(m_ssrc);
+    header.first = 0x80;
+    header.marker = 0;
+    header.payloadType = m_payloadType;
+    header.sequenceNumber = qToBigEndian(++m_sequenceNumber);
+    header.timestamp = qToBigEndian(getCurrentTimestamp());
 
+    QByteArray packet(reinterpret_cast<const char*>(&header), sizeof(RtpHeader));
+    packet.append(buffer);
 
-        // Send the audio data via the track
+    std::vector<std::byte> packetBytes(packet.size());
+    std::memcpy(packetBytes.data(), packet.data(), packet.size());
 
-
-        qDebug() << "Audio data sent to peer:" <<  peerId;
+    audioTrack->send(rtc::binary(packetBytes));
+    qDebug() << "Audio data sent to peer:" << peerId;
 }
+
+
 
 
 /**

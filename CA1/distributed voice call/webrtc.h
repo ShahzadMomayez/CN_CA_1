@@ -3,8 +3,6 @@
 
 #include <QObject>
 #include <QMap>
-
-// Build the datachannellib library and add the include path to .pro file
 #include "rtc.hpp"
 
 class WebRTC : public QObject

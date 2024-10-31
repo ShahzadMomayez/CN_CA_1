@@ -1,52 +1,48 @@
 #include "signalingserver.h"
-#include <QJsonDocument>
-#include <QJsonObject>
+#include <iostream>
+#include <QDebug>
 #include <iostream>
 
-signalingserver::signalingserver(QObject *parent) : QObject(parent) {
-    // Bind events using direct lambda expressions
-    h.socket()->on("sdp", [&](sio::event &event) { onSDP(event); });
-    h.socket()->on("ice-candidate", [&](sio::event &event) { onIceCandidate(event); });
+
+SignalingServer::SignalingServer(QObject *parent)
+    : QObject(parent)
+{
+    setupSocketHandlers();
 }
 
-void signalingserver::connectToServer(const std::string &url) {
-    h.connect(url);
-    std::cout << "Connected to signaling server at " << url << std::endl;
+void SignalingServer::connectToServer(const std::string& url)
+{
+    socketClient.connect(url);
 }
 
-void signalingserver::emitSDP(const std::string &sdp, const std::string &targetId) {
-    QJsonObject message;
-    message["type"] = "sdp"; // type should be fixed , we have to fix offerer and answerer so it would define each of them
-                             // or you should fix it from two signals sending , or from the js file fix it . then wiring them is important
-    message["targetId"] = QString::fromStdString(targetId);
-    message["sdp"] = QString::fromStdString(sdp);
+void SignalingServer::setupSocketHandlers()
+{
+    socketClient.socket()->on("sdp", [&](sio::event& ev) {
+        std::string senderId = ev.get_message()->get_map()["senderId"]->get_string();
+        std::string sdp = ev.get_message()->get_map()["sdp"]->get_string();
+        emit sdpReceived(senderId, sdp);
+    });
 
-    std::string msg = QJsonDocument(message).toJson(QJsonDocument::Compact).toStdString();
-    h.socket()->khosro_emit("sdp", msg);
+    socketClient.socket()->on("ice_candidate", [&](sio::event& ev) {
+        std::string senderId = ev.get_message()->get_map()["senderId"]->get_string();
+        std::string candidate = ev.get_message()->get_map()["candidate"]->get_string();
+        emit iceCandidateReceived(senderId, candidate);
+    });
 }
 
-void signalingserver::emitIceCandidate(const std::string &candidate, const std::string &targetId) {
-    QJsonObject message;
-    message["type"] = "ice-candidate";
-    message["targetId"] = QString::fromStdString(targetId);
-    message["candidate"] = QString::fromStdString(candidate);
-
-    std::string msg = QJsonDocument(message).toJson(QJsonDocument::Compact).toStdString();
-    h.socket()->khosro_emit("ice-candidate", msg);
+void SignalingServer::sendSDP(const std::string& targetId, const std::string& sdp)
+{
+    sio::message::ptr msg = sio::object_message::create();
+    msg->get_map()["targetId"] = sio::string_message::create(targetId);
+    msg->get_map()["sdp"] = sio::string_message::create(sdp);
+    socketClient.socket()->khosro_emit("sdp", msg);
 }
 
-void signalingserver::onSDP(sio::event &event) {
-    auto msg = event.get_message()->get_map();
-    QString sdp = QString::fromStdString(msg["sdp"]->get_string());
-    QString senderId = QString::fromStdString(msg["senderId"]->get_string());
-
-    emit sdpReceived(sdp, senderId);
+void SignalingServer::sendICECandidate(const std::string& targetId, const std::string& candidate)
+{
+    sio::message::ptr msg = sio::object_message::create();
+    msg->get_map()["targetId"] = sio::string_message::create(targetId);
+    msg->get_map()["candidate"] = sio::string_message::create(candidate);
+    socketClient.socket()->khosro_emit("ice_candidate", msg);
 }
 
-void signalingserver::onIceCandidate(sio::event &event) {
-    auto msg = event.get_message()->get_map();
-    QString candidate = QString::fromStdString(msg["candidate"]->get_string());
-    QString senderId = QString::fromStdString(msg["senderId"]->get_string());
-
-    emit iceCandidateReceived(candidate, senderId);
-}
