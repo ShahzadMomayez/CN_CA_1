@@ -10,33 +10,39 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
-    SignalingServer signalingServer;
+    WebRTC abbas;
+    abbas.init("EOT-x",false);
+    abbas.addPeer("4");
+    abbas.generateAnswerSDP("4");
+
+    // SignalingServer signalingServer;
 
     const std::string serverUrl = "http://localhost:3000";
-    const std::string callerId = "caller_01";
-    const std::string receiverId = "receiver_01";
+    // const std::string callerId = "caller_01";
+    // const std::string receiverId = "receiver_01";
 
-    signalingServer.connectToServer(serverUrl);
+    // signalingServer.connectToServer(serverUrl);
+    // QObject::connect(&abbas ,&WebRTC::sdpGenerated,&signalingServer,&SignalingServer::sendSDP);
 
-    QObject::connect(&signalingServer, &SignalingServer::sdpReceived,
-                     [&](const std::string& senderId, const std::string& sdp) {
-                         std::cout << "SDP received from: " << senderId << "\nSDP: " << sdp << std::endl;
-                         // handleling received SDP here, potentially create an answer.
-                     });
+    // QObject::connect(&signalingServer, &SignalingServer::sdpReceived,
+    //                  [&](const std::string& senderId, const std::string& sdp) {
+    //                      std::cout << "SDP received from: " << senderId << "\nSDP: " << sdp << std::endl;
+    //                      // handleling received SDP here, potentially create an answer.
+    //                  });
 
-    QObject::connect(&signalingServer, &SignalingServer::iceCandidateReceived,
-                     [&](const std::string& senderId, const std::string& candidate) {
-                         std::cout << "ICE Candidate received from: " << senderId << "\nCandidate: " << candidate << std::endl;
+    // QObject::connect(&signalingServer, &SignalingServer::iceCandidateReceived,
+    //                  [&](const std::string& senderId, const std::string& candidate) {
+    //                      std::cout << "ICE Candidate received from: " << senderId << "\nCandidate: " << candidate << std::endl;
 
-                     });
+    //                  });
 
-    // Get the default audio input device
-    QAudioDevice audioDevice = QMediaDevices::defaultAudioInput();
-    AudioInput audioInput(audioDevice);
+    // // Get the default audio input device
+    // QAudioDevice audioDevice = QMediaDevices::defaultAudioInput();
+    // AudioInput audioInput(audioDevice);
 
-    // Example: sending an SDP offer
-    std::string exampleSdp = "v=0...";
-    signalingServer.sendSDP(receiverId, exampleSdp);
+    // // Example: sending an SDP offer
+    // std::string exampleSdp = "v=0...";
+    // signalingServer.sendSDP(receiverId, exampleSdp);
 
     return app.exec();
 }

@@ -10,7 +10,7 @@ class SignalingServer : public QObject
 public:
     explicit SignalingServer(QObject *parent = nullptr);
     void connectToServer(const std::string& url);
-    void sendSDP(const std::string& targetId, const std::string& sdp);
+    void sendSDP( const QString& sdp);
     void sendICECandidate(const std::string& targetId, const std::string& candidate);
 
 signals:

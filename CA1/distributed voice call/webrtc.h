@@ -61,6 +61,8 @@ Q_SIGNALS:
 
     void bitRateChanged();
 
+    void sdpGenerated(const QString& sdpJson);
+
 public Q_SLOTS:
     void setRemoteDescription(const QString &peerID, const QString &sdp);
     void setRemoteCandidate(const QString &peerID, const QString &candidate, const QString &sdpMid);

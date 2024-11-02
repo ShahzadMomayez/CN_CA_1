@@ -35,18 +35,19 @@ HEADERS += \
     webrtc.h
 
 # Adding include paths for WebRTC and Opus
-INCLUDEPATH += C:/Users/Amirali/Desktop/UT/Network/Projects/lib/libdatachannel
-INCLUDEPATH += C:/Users/Amirali/Desktop/UT/Network/Projects/lib/opus/include
-INCLUDEPATH += C:/Users/Amirali/Desktop/UT/Network/Projects/lib/libdatachannel/include/rtc
+INCLUDEPATH += D:\SHAHZAD\00UT\sems\sem7\07-ComputerNetworks\Projects\lib\libdatachannel
+INCLUDEPATH += D:\SHAHZAD\00UT\sems\sem7\07-ComputerNetworks\Projects\lib/opus/include
+INCLUDEPATH += D:\SHAHZAD\00UT\sems\sem7\07-ComputerNetworks\Projects\lib\libdatachannel\include\rtc
 
-INCLUDEPATH += C:/Users/Amirali/Desktop/UT/Network/Projects/lib/socket.io-client-cpp/lib/websocketpp
-INCLUDEPATH += C:/Users/Amirali/Desktop/UT/Network/Projects/lib/socket.io-client-cpp/lib/asio/asio/include
-INCLUDEPATH += C:/Users/Amirali/Desktop/UT/Network/Projects/lib/socket.io-client-cpp/lib/rapidjson/include
+
+INCLUDEPATH +=  D:\SHAHZAD\00UT\sems\sem7\07-ComputerNetworks\Projects\lib/socket.io-client-cpp/lib/websocketpp
+INCLUDEPATH +=  D:\SHAHZAD\00UT\sems\sem7\07-ComputerNetworks\Projects\lib\socket.io-client-cpp/lib/asio/asio/include
+INCLUDEPATH +=  D:\SHAHZAD\00UT\sems\sem7\07-ComputerNetworks\Projects\lib\socket.io-client-cpp/lib/rapidjson/include
 
 # Linking with WebRTC library and Opus library
-LIBS += -LC:\Users\Amirali\Desktop\UT\Network\Projects\lib\libdatachannel/Windows/Mingw64 -ldatachannel.dll
-LIBS += -LC:/Qt/Tools/OpenSSLv3/Win_x64/bin -lcrypto-3-x64 -lssl-3-x64
-LIBS += -LC:/Users/Amirali/Desktop/UT/Network/Projects/lib/opus/Windows/Mingw64 -lopus
+LIBS += -LD:\SHAHZAD\00UT\sems\sem7\07-ComputerNetworks\Projects\lib\libdatachannel/Windows/Mingw64 -ldatachannel.dll
+LIBS += -LD:/Qt/Tools/OpenSSLv3/Win_x64/bin -lcrypto-3-x64 -lssl-3-x64
+LIBS += -LD:\SHAHZAD\00UT\sems\sem7\07-ComputerNetworks\Projects\lib\opus/Windows/Mingw64 -lopus
 # LIBS += -LD:\SHAHZAD\00UT\sems\sem7\07-ComputerNetworks\Projects\lib\libdatachannel\Windows\Mingw64 -l
 
 # Add additional libraries for Windows
@@ -56,7 +57,8 @@ LIBS += -lssp
 # Disable stack protection to prevent "__stack_chk_fail" error
 QMAKE_CXXFLAGS += -fno-stack-protector
 QMAKE_CFLAGS += -fno-stack-protector
-#QMAKE_LFLAGS += -fuse-ld=lld    ## for ID error
+QMAKE_LFLAGS += -fuse-ld=lld
+#QMAKE_LFLAGS += -fuse-ld=lld    ## for ld error
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

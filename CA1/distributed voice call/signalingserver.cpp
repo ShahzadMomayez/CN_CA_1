@@ -30,12 +30,9 @@ void SignalingServer::setupSocketHandlers()
     });
 }
 
-void SignalingServer::sendSDP(const std::string& targetId, const std::string& sdp)
+void SignalingServer::sendSDP(const QString& sdp)
 {
-    sio::message::ptr msg = sio::object_message::create();
-    msg->get_map()["targetId"] = sio::string_message::create(targetId);
-    msg->get_map()["sdp"] = sio::string_message::create(sdp);
-    socketClient.socket()->khosro_emit("sdp", msg);
+    socketClient.socket()->khosro_emit("sdp", sdp.toStdString());
 }
 
 void SignalingServer::sendICECandidate(const std::string& targetId, const std::string& candidate)
