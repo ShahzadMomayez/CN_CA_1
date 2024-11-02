@@ -1,48 +1,39 @@
-#include <QCoreApplication>
-#include "signalingserver.h"
-#include <QMediaDevices>
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+#include <QUrl>
 #include <QDebug>
+
+// Including necessary headers
 #include "audioinput.h"
 #include "audiooutput.h"
+#include "uihandler.h"
 #include "webrtc.h"
-#include <iostream>
+//#include "signalingserver.h" // Uncomment if SignalingServer is used
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication app(argc, argv);
-    WebRTC abbas;
-    abbas.init("EOT-x",false);
-    abbas.addPeer("4");
-    abbas.generateAnswerSDP("4");
+    // WebRTC webRtc ;
+    // webRtc.init("EOT-x",true);
+    // webRtc.addPeer("4");
+    // webRtc.generateOfferSDP("4");
 
-    // SignalingServer signalingServer;
+    QGuiApplication app(argc, argv); // Use QGuiApplication instead of QCoreApplication
 
-    const std::string serverUrl = "http://localhost:3000";
-    // const std::string callerId = "caller_01";
-    // const std::string receiverId = "receiver_01";
+    QQmlApplicationEngine engine;
+    qmlRegisterType<UIHandler>("UIHandler", 1, 0, "UIHandler");
 
-    // signalingServer.connectToServer(serverUrl);
-    // QObject::connect(&abbas ,&WebRTC::sdpGenerated,&signalingServer,&SignalingServer::sendSDP);
+    QUrl url("qrc:/main.qml");
 
-    // QObject::connect(&signalingServer, &SignalingServer::sdpReceived,
-    //                  [&](const std::string& senderId, const std::string& sdp) {
-    //                      std::cout << "SDP received from: " << senderId << "\nSDP: " << sdp << std::endl;
-    //                      // handleling received SDP here, potentially create an answer.
-    //                  });
+    QObject::connect(
+        &engine,
+        &QQmlApplicationEngine::objectCreationFailed,
+        &app,
+        []() { QCoreApplication::exit(-1); },
+        Qt::QueuedConnection);
+    engine.load(url);
 
-    // QObject::connect(&signalingServer, &SignalingServer::iceCandidateReceived,
-    //                  [&](const std::string& senderId, const std::string& candidate) {
-    //                      std::cout << "ICE Candidate received from: " << senderId << "\nCandidate: " << candidate << std::endl;
-
-    //                  });
-
-    // // Get the default audio input device
-    // QAudioDevice audioDevice = QMediaDevices::defaultAudioInput();
-    // AudioInput audioInput(audioDevice);
-
-    // // Example: sending an SDP offer
-    // std::string exampleSdp = "v=0...";
-    // signalingServer.sendSDP(receiverId, exampleSdp);
+    if (engine.rootObjects().isEmpty())
+        return -1;
 
     return app.exec();
 }

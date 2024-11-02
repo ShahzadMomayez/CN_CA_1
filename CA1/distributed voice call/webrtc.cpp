@@ -54,7 +54,7 @@ void WebRTC::init(const QString &id, bool isOfferer) {
     m_isOfferer = isOfferer;
 
     // Create an instance of rtc::Configuration to Set up ICE configuration
-    m_config.iceServers.emplace_back("stun:stun.l.google.com:19302"); // Add a STUN server
+    m_config.iceServers.emplace_back("stun.l.google.com:19302"); // Add a STUN server
    // m_config.iceServers.emplace_back("turn:your.turn.server.here:3478?transport=udp"); // Add a TURN server
 
     // Initialize the audio stream configuration
@@ -83,7 +83,6 @@ void WebRTC::addPeer(const QString &peerId)
     // Set up a callback for when the local description is generated
     newPeer->onLocalDescription([this, peerId](const rtc::Description &description) {
         QString sdp = QString::fromStdString(description.generateSdp());
-        D <<"kargahi";
         emit localDescriptionGenerated(peerId, sdp);
 
         // The local description should be emitted using the appropriate signals based on the peer's role (offerer or answerer)
@@ -136,8 +135,14 @@ void WebRTC::addPeer(const QString &peerId)
         if (state == rtc::PeerConnection::GatheringState::Complete) {
             D<<"gathering completed";
             auto peer = m_peerConnections[peerId];
+            if (!m_isOfferer)
+            {
+                peer->setLocalDescription(rtc::Description::Type::Answer);
+                D<<"daaa";
+            }
             QString sdpJson = this->descriptionToJson(peer->localDescription().value());
             emit sdpGenerated(sdpJson);
+            D<<"Emited";
             emit gatheringComplited(peerId);
 
         }
@@ -188,9 +193,9 @@ void WebRTC::generateAnswerSDP(const QString &peerId) {
         qWarning() << "Peer connection not found for" << peerId;
         return;
     }
-    D<< "Asdklaskd;laskd;laskd;laskd;askd;laskdas;l";
-
-    peerConnection->setLocalDescription(rtc::Description::Type::Answer);
+    peerConnection->setLocalDescription(rtc::Description::Type::Unspec);
+    peerConnection->localDescription()->generateSdp();
+    D<<"da";
 }
 
 
@@ -215,7 +220,10 @@ void WebRTC::addAudioTrack(const QString &peerId, const QString &trackName) {
     // Add the audio track to the peer connection
     auto audioTrack = peerConnection->addTrack(m_audio);
     m_peerTracks.insert(peerId, audioTrack);
-
+    audioTrack->onOpen([this]()
+                       {
+                  D<<"trak is open";
+    });
     // Handle track events
     audioTrack->onFrame([this, peerId](rtc::binary frame, rtc::FrameInfo info) {
         qDebug() << "Received audio frame from peer:" << peerId;
@@ -277,7 +285,7 @@ void WebRTC::setRemoteDescription(const QString &peerID, const QString &sdp)
         return;
     }
     QString rawSdp = sdp;
-    rtc::Description remoteDescription(rawSdp.toStdString(), (m_isOfferer)?rtc::Description::Type::Answer: rtc::Description::Type::Offer,rtc::Description::Role::ActPass);
+    rtc::Description remoteDescription(rawSdp.toStdString(), (m_isOfferer)?rtc::Description::Type::Answer: rtc::Description::Type::Offer,rtc::Description::Role::Active);
     peerConnection->setRemoteDescription(remoteDescription);
 
 
@@ -344,14 +352,14 @@ QString WebRTC::descriptionToJson(const rtc::Description &description)
     QJsonObject json;
 
     // Set the type of the SDP (Offer/Answer)
-    json["type"] = QString::fromStdString(description.typeString()); // Using typeString method for type
+    json["type"] = (m_isOfferer)? "offer": "answer" ;// Using typeString method for type
 
     // Set the SDP string
     json["sdp"] = QString::fromStdString(description.generateSdp()); // Assuming cast to std::string for SDP
 
     // Convert QJsonObject to QString
     QJsonDocument doc(json);
-    D<<QString(doc.toJson());
+
     return QString(doc.toJson());
 }
 

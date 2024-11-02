@@ -12,9 +12,9 @@ public:
     void connectToServer(const std::string& url);
     void sendSDP( const QString& sdp);
     void sendICECandidate(const std::string& targetId, const std::string& candidate);
-
+    void asnwerSocket();
 signals:
-    void sdpReceived(const std::string& senderId, const std::string& sdp);
+    void sdpReceived(const QString sdp);
     void iceCandidateReceived(const std::string& senderId, const std::string& candidate);
 
 private:

@@ -21,6 +21,7 @@ SOURCES += \
     audiooutput.cpp \
     main.cpp \
     signalingserver.cpp \
+    uihandler.cpp \
     webrtc.cpp
 
 HEADERS += \
@@ -32,6 +33,7 @@ HEADERS += \
     audioinput.h \
     audiooutput.h \
     signalingserver.h \
+    uihandler.h \
     webrtc.h
 
 # Adding include paths for WebRTC and Opus

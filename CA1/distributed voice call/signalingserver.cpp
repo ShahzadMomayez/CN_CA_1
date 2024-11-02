@@ -17,10 +17,11 @@ void SignalingServer::connectToServer(const std::string& url)
 
 void SignalingServer::setupSocketHandlers()
 {
+
     socketClient.socket()->on("sdp", [&](sio::event& ev) {
-        std::string senderId = ev.get_message()->get_map()["senderId"]->get_string();
-        std::string sdp = ev.get_message()->get_map()["sdp"]->get_string();
-        emit sdpReceived(senderId, sdp);
+        std::string massage = ev.get_message()->get_string();
+        emit sdpReceived(QString::fromStdString(massage));
+        qDebug()<<"Asdasd";
     });
 
     socketClient.socket()->on("ice_candidate", [&](sio::event& ev) {
@@ -41,5 +42,10 @@ void SignalingServer::sendICECandidate(const std::string& targetId, const std::s
     msg->get_map()["targetId"] = sio::string_message::create(targetId);
     msg->get_map()["candidate"] = sio::string_message::create(candidate);
     socketClient.socket()->khosro_emit("ice_candidate", msg);
+}
+
+void SignalingServer::asnwerSocket()
+{
+    socketClient.socket()->khosro_emit("mewo");
 }
 
