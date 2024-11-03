@@ -304,7 +304,6 @@ QByteArray WebRTC::readVariant(const rtc::message_variant &data)
 
 QString WebRTC::descriptionToJson(const rtc::Description &description)
 {
-
     QJsonObject json;
     json["type"] = (m_isOfferer)? "offer": "answer" ;
     json["sdp"] = QString::fromStdString(description.generateSdp());
