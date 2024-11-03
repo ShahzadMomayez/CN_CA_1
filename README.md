@@ -31,7 +31,7 @@ It is not an easy task to send a stream of audio and video data over the Interne
 ![My Local Image](https://path-to-your-image.com/audioinputH.png)
 
 #### .cpp File Breakdown
-###Constructor:
+### Constructor:
 
 Sets the audio format, specifying:
 Sample rate (48,000 Hz).
