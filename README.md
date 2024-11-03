@@ -1,54 +1,54 @@
 # ComputerNetworks
 # Distributed voice call using WebRTC
-#### Shahzad Momayez 810100272, Amirali Shahriari 810100173
+#### Shahzad Momayez 810100272, Amirali Shahriary 810100173
 
 ## 1. Introduction:
-This project aims to develop a real-time communication platform using WebRTC, enhanced by the libdatachannel library for data transmission and the Opus codec for superior audio quality.
+This project aims to develop a real-time communication(peer-to-peer voice call system) platform on QT framework using WebRTC, enhanced by the libdatachannel library for data transmission and the Opus codec for superior audio quality.
 
 ## 2. List any prerequisites or dependencies:
 • Qt framework 
+
 • WebRTC (with libdatachannel) 
+
 • Opus
+
 • Coturn
 
-## 3. what is WebRTC?
-WebRTC (Web Real-Time Communication) is a powerful, open-source project that enables real-time communication directly within web browsers and mobile applications. Its magic lies in facilitating peer-to-peer audio, video, and data sharing without the need for plugins or external software.
+## 3.   Voice Capture:
 
-Imagine you're using a web app for a video call or multiplayer game, and WebRTC seamlessly handles the live communication between your device and your friend's. It's used in video conferencing apps, live streaming platforms, collaborative work tools, and even gaming applications.
-
-The WebRTC API includes media capture, encoding and decoding audio and video, transportation layer, and session management.
-
-![My Local Image](https://path-to-your-image.com/webRTC-1.png)
+For voice capture, we implemented an AudioInput class that captures audio directly from the microphone. Using the Qt QAudioSource API, this class continuously retrieves audio data in real-time, which is then passed to an Opus encoder for compression. This encoded data is lightweight and optimized for low-latency transmission over the network, ensuring that audio remains clear and responsive. By integrating this with WebRTC, we were able to stream the captured audio efficiently to the other peer, enabling smooth, real-time voice communication between instances.
 
 
-## 4. Media Capture
-The first step is to get access to the camera and microphone of the user's device. We detect the type of devices available, get user permission to access these devices and manage the stream.
+## 4. Encoding and Decoding Audio using Opus:
 
-## 5. Encoding and Decoding Audio and Video:
-It is not an easy task to send a stream of audio and video data over the Internet. This is where encoding and decoding are used. This is the process of splitting up video frames and audio waves into smaller chunks and compressing them. This algorithm is called codec. There is an enormous amount of different codecs, which are maintained by different companies with different business goals. There are also many codecs inside WebRTC like Opus.
+In our project, we used the Opus codec for both encoding and decoding audio, optimizing for real-time communication. On the capturing end, the AudioInput class takes raw audio data from the microphone and passes it to the Opus encoder. This encoding process compresses the audio data significantly while preserving voice quality, which is essential for reducing bandwidth usage and minimizing transmission delays. The compressed data is then sent over WebRTC to the receiving peer.
+
+On the receiving end, the AudioOutput class takes the incoming compressed audio packets and decodes them using the Opus decoder. This decoding restores the audio to a near-original quality format, which is then fed into the QAudioSink for playback. By using Opus for both encoding and decoding, we achieved efficient data transmission and maintained high-quality, low-latency audio, essential for a smooth and natural communication experience in our distributed voice call application.
+
+here is the code for this approach:
+![audioinput.cpp](https://github.com/ShahzadMomayez/CN_CA_1/blob/master/ReadmeFiles/audioinputCPP.png)
+
+Constructor:
+Sets the audio format, specifying: Sample rate (48,000 Hz). Mono channel (1 channel). Int16 sample format, which is standard for Opus. Creates a new QAudioSource with the given devinfo and specified format. Initializes the Opus encoder with opus_encoder_create, checking for errors.
+
+start() Method:
+Opens the QIODevice in write-only mode, indicating that audio data will be written to it. Starts capturing audio data with audioSource->start(this), setting this class as the audio receiver. Logs a message indicating the start of recording.
+
+stop() Method:
+Stops the audio source and closes the QIODevice. Logs a message indicating the end of recording.
+
+writeData() Method:
+Validates that the Opus encoder has been initialized. Checks if the audio frame size matches Opus requirements (120, 240, 480, 960, 1920, or 2880 samples). Encodes the data: The opus_encode function compresses the audio input, writing it to outputBuffer. If encoding succeeds, the encoded data is wrapped in a QByteArray and emitted with newDataAvailable. Returns the length of input data processed, allowing seamless streaming. This class allows real-time audio data capture and encoding, handling both the low-level Opus encoding requirements and the high-level Qt audio input functionality.
+
+## 5. WebRTC:
+
+In this project, WebRTC (Web Real-Time Communication) played a central role in establishing peer-to-peer audio connections, allowing real-time voice data exchange between two instances of the application. By leveraging WebRTC’s data channels, we facilitated a direct connection without relying on a central server to relay audio streams, significantly reducing latency. Our implementation focused on handling connection setup, SDP (Session Description Protocol) exchanges, and ICE (Interactive Connectivity Establishment) candidates, which were essential for network traversal and establishing direct links between peers. We integrated WebRTC with Qt through a custom webrtc.cpp class, managing audio tracks and synchronizing connection events. WebRTC’s protocols provided us with robust support for low-latency, high-quality audio transmission, forming the backbone of our distributed voice call system. The integration also required close attention to STUN (Session Traversal Utilities for NAT) servers for NAT traversal, enabling the instances to discover each other even across different networks. This WebRTC setup allowed us to achieve real-time, resilient peer-to-peer communication.
 
 
-##6. SignalingServer:
-To connect to another user you should know where he is located on the Web. The IP address of your device allows Internet-enabled devices to send data directly between each other. The RTCPeerConnection object is responsible for this. As soon as devices know how to find each other over the Internet, they start exchanging data about which protocols and codecs each device supports.
+## 6. SignalingServer:
+For the signaling server, we implemented a solution to manage the critical connection setup between peers in our distributed voice call system. The signaling server, built using WebSocket technology with Node.js and socket.io, facilitates the exchange of necessary connection data, such as Session Description Protocol (SDP) information and Interactive Connectivity Establishment (ICE) candidates, between peers. This setup process, essential for establishing WebRTC connections, includes sharing offers, answers, and ICE candidates that allow peers to locate each other and establish a direct connection.
 
-To communicate with another user you simply need to exchange contact information and the rest will be done by WebRTC. The process of connecting to the other user is also known as signaling and negotiation. It consists of a few steps. including:
-
-
-    1. Create a list of potential candidates for a peer connection.
-
-    2. The user or an application selects a user to make a connection with.
-
-    3. The signaling layer notifies another user that someone want to connect to him. He can accept or decline.
-
-    4. The first user is notified of the acceptance of the offer.
-
-    5. The first user initiates RTCPeerConnection with another user.
-
-    6. Both users exchange software and hardware information through the signaling server.
-
-    7. Both users exchange location information.
-
-    8. The connection succeeds or fails.
+The server does not handle the media or voice data itself but operates purely as an intermediary for exchanging control messages, making it lightweight and efficient. The signalingserver class in our project manages these interactions by connecting to the WebSocket server, sending and receiving messages related to SDP and ICE candidates, and triggering the necessary functions to set up and update peer-to-peer connections. By centralizing the signaling process, we streamlined the initial connection setup, allowing peers to connect directly for voice data exchange without the server's involvement in the actual call. This approach supports scalability and maintains low-latency communication for real-time voice calls.
 
 ## 7. Building the Server
 
