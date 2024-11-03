@@ -20,6 +20,7 @@ AudioOutput::AudioOutput(QObject *parent) : QObject(parent) {
 
 void AudioOutput::start() {
     audioDevice = audioSink->start();
+    qDebug()<<"started";
 }
 
 void AudioOutput::stop() {

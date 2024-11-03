@@ -9,7 +9,7 @@ class AudioInput : public QIODevice {
     Q_OBJECT
 
 public:
-    AudioInput(const QAudioDevice &devinfo, QObject *parent = nullptr);
+    AudioInput(QObject *parent = nullptr);
     void start();
     void stop();
 

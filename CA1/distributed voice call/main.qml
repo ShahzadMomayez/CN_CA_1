@@ -2,14 +2,17 @@ import QtQuick
 import QtQuick.Controls.Material
 import QtQuick.Layouts
 import UIHandler
-Window {
+ApplicationWindow {
     width: 280
     height: 520
     visible: true
     title: qsTr("CA1")
+    flags: Qt.Dialog | Qt.WindowTitleHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint | Qt.WindowStaysOnTopHint
+
     UIHandler{
         id:uiHandler
     }
+
     Item{
         anchors.fill: parent
 

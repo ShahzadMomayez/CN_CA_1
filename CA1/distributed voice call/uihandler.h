@@ -18,6 +18,8 @@ private:
     SignalingServer* signalingServerHandler;
 public Q_SLOTS:
     void setAnswerSdp(const QString& sdp);
+    void setOfferSdp(const QString& sdp);
+    void sendData(const QByteArray& data);
 signals:
 };
 

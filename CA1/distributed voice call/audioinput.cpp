@@ -1,13 +1,13 @@
 #include "audioinput.h"
 #include <QDebug>
 
-AudioInput::AudioInput(const QAudioDevice &devinfo, QObject *parent) : QIODevice(parent) {
+AudioInput::AudioInput(QObject *parent) : QIODevice(parent) {
     QAudioFormat format;
     format.setSampleRate(48000);
     format.setChannelCount(1);
     format.setSampleFormat(QAudioFormat::Int16);
 
-    audioSource = new QAudioSource(devinfo, format, this);
+    audioSource = new QAudioSource(format, this);
     // oppus encoder
     opusEncoder = opus_encoder_create(48000, 1, OPUS_APPLICATION_AUDIO, &opusError);
     if (opusError != OPUS_OK) {

@@ -41,6 +41,8 @@ Q_SIGNALS:
 
     void closedDataChannel(const QString &peerId);
 
+    void packetRecieved(const QByteArray & packet);
+
     void incommingPacket(const QString &peerId, const QByteArray &data, qint64 len);
 
     void localDescriptionGenerated(const QString &peerID, const QString &sdp);
@@ -60,6 +62,8 @@ Q_SIGNALS:
     void payloadTypeChanged();
 
     void bitRateChanged();
+
+    void trackIsOPen();
 
     void sdpGenerated(const QString& sdpJson);
 
@@ -84,6 +88,7 @@ private:
     static inline uint32_t                              m_instanceCounter = 0;
     bool                                                m_gatheringComplited = false;
     int                                                 m_bitRate = 48000;
+    bool                                                m_trrakOpen = false;
     int                                                 m_payloadType = 111;
     rtc::Description::Audio                             m_audio;
     rtc::SSRC                                           m_ssrc = 2;

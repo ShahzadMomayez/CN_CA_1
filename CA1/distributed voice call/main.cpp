@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     // webRtc.init("EOT-x",true);
     // webRtc.addPeer("4");
     // webRtc.generateOfferSDP("4");
-
+    qDebug()<< "kaasdfghjrgahi";
     QGuiApplication app(argc, argv); // Use QGuiApplication instead of QCoreApplication
 
     QQmlApplicationEngine engine;
@@ -29,11 +29,13 @@ int main(int argc, char *argv[])
         &QQmlApplicationEngine::objectCreationFailed,
         &app,
         []() { QCoreApplication::exit(-1); },
-        Qt::QueuedConnection);
+        Qt::AutoConnection);
     engine.load(url);
 
     if (engine.rootObjects().isEmpty())
         return -1;
+
+
 
     return app.exec();
 }
