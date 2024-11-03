@@ -38,12 +38,148 @@ Opens the QIODevice in write-only mode, indicating that audio data will be writt
 #### stop() Method:
 Stops the audio source and closes the QIODevice. Logs a message indicating the end of recording.
 
-### writeData() Method:
+#### writeData() Method:
 Validates that the Opus encoder has been initialized. Checks if the audio frame size matches Opus requirements (120, 240, 480, 960, 1920, or 2880 samples). Encodes the data: The opus_encode function compresses the audio input, writing it to outputBuffer. If encoding succeeds, the encoded data is wrapped in a QByteArray and emitted with newDataAvailable. Returns the length of input data processed, allowing seamless streaming. This class allows real-time audio data capture and encoding, handling both the low-level Opus encoding requirements and the high-level Qt audio input functionality.
+
+NOTE :we use a header file for the audioinput class as part of organizing the code and defining the class interface.
+
+### audiooutput.cpp:
+
+![audiooutput.cpp](https://github.com/ShahzadMomayez/CN_CA_1/blob/master/ReadmeFiles/audioOutputCPP.png)
+
+#### 1. **Constructor (`AudioOutput::AudioOutput(QObject *parent)`)**
+   - **Purpose**: Initializes the audio playback setup and the Opus decoder.
+   - **Key Steps**:
+     - **Audio Format Setup**:
+       - Creates a `QAudioFormat` instance to specify the audio properties:
+         - **Sample Rate**: 48,000 Hz (matches the Opus codec standard for voice).
+         - **Channel Count**: 1 (mono, as voice typically requires only a single channel).
+         - **Sample Format**: `Int16` (16-bit integer samples), which Opus encoding and decoding expect.
+     - **Audio Sink Initialization**:
+       - Instantiates a `QAudioSink` with the specified `QAudioFormat`. This sink acts as the interface for audio playback.
+       - Calls `audioSink->start()` to start the sink, which initializes a `QIODevice` (`audioDevice`) for writing the audio data directly to the audio output.
+     - **Opus Decoder Initialization**:
+       - Calls `opus_decoder_create`, which sets up the Opus decoder with:
+         - **Sample Rate**: 48,000 Hz.
+         - **Channel Count**: 1 (mono).
+       - Stores any error encountered in `opusError` and logs a warning if initialization fails.
+
+### 2. **`start()` Method**
+   - **Purpose**: Starts the audio output for playback.
+   - **Functionality**:
+     - Calls `audioSink->start()` to (re)initialize `audioDevice` and begin audio playback.
+     - This ensures `audioDevice` is set up and ready to receive audio data for output.
+   - **Why It’s Needed**: This is useful for restarting playback if it was previously stopped or if reinitialization is required.
+
+### 3. **`stop()` Method**
+   - **Purpose**: Stops audio playback and cleans up resources.
+   - **Functionality**:
+     - Calls `audioSink->stop()` to halt audio output.
+     - Destroys the Opus decoder using `opus_decoder_destroy`, freeing up resources allocated to the decoder.
+   - **Why It’s Needed**: This method ensures that playback stops cleanly and any allocated resources are released, preventing memory leaks.
+
+### 4. **`addData()` Slot**
+   - **Purpose**: Processes incoming encoded audio data, decodes it, and writes the decoded data to the audio device for playback.
+   - **Functionality**:
+     - **Thread Safety**:
+       - Uses `QMutexLocker locker(&mutex);` to ensure that only one thread at a time can execute this function. This is crucial in a real-time application where audio data may arrive concurrently.
+     - **Decoding Data**:
+       - Allocates a buffer `decodedData` of `opus_int16` type (16-bit samples) to hold the decoded output.
+       - Calls `opus_decode` to decode the incoming Opus-encoded audio data (`data`):
+         - `opus_decode` converts the compressed audio data in `data` into raw PCM audio samples, storing them in `decodedData`.
+         - If decoding fails (i.e., `decodedSamples < 0`), it logs a warning and exits the function.
+       - Converts the decoded data into a `QByteArray` (`rawData`) for easier handling.
+       - Writes `rawData` directly to `audioDevice`, which plays the decoded audio through the audio sink.
+   - **Why It’s Needed**: This function is called whenever new audio data arrives. It decodes the compressed data and sends it to the audio output, enabling real-time audio playback for a voice call.
+
 
 ## 5. WebRTC:
 
 In this project, WebRTC (Web Real-Time Communication) played a central role in establishing peer-to-peer audio connections, allowing real-time voice data exchange between two instances of the application. By leveraging WebRTC’s data channels, we facilitated a direct connection without relying on a central server to relay audio streams, significantly reducing latency. Our implementation focused on handling connection setup, SDP (Session Description Protocol) exchanges, and ICE (Interactive Connectivity Establishment) candidates, which were essential for network traversal and establishing direct links between peers. We integrated WebRTC with Qt through a custom webrtc.cpp class, managing audio tracks and synchronizing connection events. WebRTC’s protocols provided us with robust support for low-latency, high-quality audio transmission, forming the backbone of our distributed voice call system. The integration also required close attention to STUN (Session Traversal Utilities for NAT) servers for NAT traversal, enabling the instances to discover each other even across different networks. This WebRTC setup allowed us to achieve real-time, resilient peer-to-peer communication.
+
+![schema](https://github.com/ShahzadMomayez/CN_CA_1/blob/master/ReadmeFiles/webrtc-1.png)
+
+### webrtc.cpp
+
+
+#### Struct RtpHeader
+**Purpose:** Defines the structure for the RTP (Real-time Transport Protocol) header, enabling efficient audio packet transmission.  
+**Fields:**  
+- **first:** First byte of RTP header.  
+- **marker, payloadType, sequenceNumber, timestamp, ssrc:** Fields specific to RTP header protocol.  
+**Usage:** This structure is used when sending audio packets to peers.
+
+#### Constructor and Destructor
+**Constructor (WebRTC::WebRTC):**  
+Initializes m_audio, the audio description object, and establishes a signal connection for when ICE gathering completes.  
+**Destructor (~WebRTC):**  
+Clears m_peerConnections on object destruction, ensuring proper cleanup of peer connections.
+
+#### Public Methods
+
+**init:**  
+
+![init](https://github.com/ShahzadMomayez/CN_CA_1/blob/master/ReadmeFiles/WebrtcInit.png)
+
+
+Initializes the WebRTC configuration with peer-specific details (isOfferer) and sets up ICE servers.  
+Configures the audio track with the Opus codec and sets the direction (SendOnly/RecvOnly) based on whether the peer is the offerer.  
+Clears previous connections and tracks.
+
+
+
+**addPeer:**  
+
+![addpeer](https://github.com/ShahzadMomayez/CN_CA_1/blob/master/ReadmeFiles/WebRTCaddpeer.png)
+
+Adds a new peer connection, setting up several callbacks:  
+- **Local Description Callback:** Generates SDP when local description is ready.  
+- **Local Candidate Callback:** Handles local ICE candidates.  
+- **State Change Callback:** Monitors and logs connection states.  
+- **Gathering State Callback:** Indicates when ICE gathering is complete.  
+- **Track Callback:** Monitors and opens the audio track when received from the remote peer.
+
+**generateOfferSDP & generateAnswerSDP:** 
+
+![generateoffer](https://github.com/ShahzadMomayez/CN_CA_1/blob/master/ReadmeFiles/WebRTC-generateOfferAndAnswerSDP-addAudioTrack.png)
+
+Generates the local SDP offer or answer, setting it as the local description for the peer.
+
+**addAudioTrack:**  
+Adds the audio track to a peer connection using the m_audio configuration, attaching it to m_peerTracks.  
+Sets up message callbacks to handle incoming audio packets.
+
+**sendTrack:**  
+
+![sendtrack](https://github.com/ShahzadMomayez/CN_CA_1/blob/master/ReadmeFiles/WebRTCSendTrack.png)
+
+Prepares and sends audio data to the peer by creating an RTP packet with the RtpHeader, appending the encoded audio data, and transmitting it via the WebRTC track.
+
+#### Public Slots
+**setRemoteDescription:**  
+Sets the remote description (SDP) provided by the peer, which includes essential session information such as codec and direction.
+
+**setRemoteCandidate:**  
+Adds a remote ICE candidate after validating the candidate data and ensuring the remote description is set. This supports peer-to-peer connectivity.
+
+#### Private Methods
+
+![private_methods]https://github.com/ShahzadMomayez/CN_CA_1/blob/master/ReadmeFiles/WebRTCPrivateMethods.png)
+
+**readVariant:**  
+Parses the rtc::message_variant type into a QByteArray, handling different possible types like binary data or strings.
+
+**descriptionToJson:**  
+Converts an rtc::Description object into JSON format, generating an SDP offer or answer in JSON for transmission.
+
+**Bitrate and Codec Management:**  
+Methods like **setBitRate**, **resetBitRate**, **setPayloadType**, and **resetPayloadType** control the bitrate and payload type for the audio codec.  
+**setSsrc** and **resetSsrc** manage the SSRC (synchronization source identifier) for identifying the audio stream.
+
+#### Signals and Slots
+Signals such as **localDescriptionGenerated**, **localCandidateGenerated**, **gatheringComplited**, and **packetRecieved** manage communication between components and signal important states (e.g., when ICE gathering is complete or audio packets are received).  
+Slots support dynamic configuration during runtime, such as setting new bit rates or handling changes in payload types and SSRC.
+
 
 
 ## 6. SignalingServer:
