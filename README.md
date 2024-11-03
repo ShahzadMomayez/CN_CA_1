@@ -12,7 +12,7 @@ This project aims to develop a real-time communication(peer-to-peer voice call s
 
 • Opus
 
-• Coturn
+• Coturn (Optional)
 
 ## 3.   Voice Capture:
 
@@ -101,7 +101,7 @@ In this project, WebRTC (Web Real-Time Communication) played a central role in e
 
 The above diagram is the messaging flow between users when using the signaling server. First of all, each user registers with the server. In our case, this will be a simple string username. Once users have registered, they are able to call each other. User 1 makes an offer with the user identifier he wishes to call. The other user should answers. Finally, ICE candidates are sent between users until they can make a connection.
 
-### webrtc.cpp
+### webrtc.cpp:
 
 
 #### Struct RtpHeader
@@ -274,11 +274,8 @@ The `signalingServer.js` file implements a signaling server using Node.js, Expre
 **Summary:**  
 The `signalingServer.js` file plays a vital role in managing signaling for WebRTC connections by facilitating the exchange of SDP offers and answers. It handles client connections, maintains state, and ensures reliable message delivery, enabling seamless peer-to-peer communication.
 
-## 8. ICE Candidates
 
-The final part is handling ICE candidate between users. We use the same technique just passing messages between users. The main difference is that candidate messages might happen multiple times per user in any order.
-
-## UI Handler:
+## 8. UI Handler:
 
 **Purpose:**  
 The `uihandler.cpp` file implements the `UIHandler` class, which manages user interface interactions and connects user actions to the underlying WebRTC functionality. It handles the initiation of calls, offers, answers, and manages audio input and output streams.
