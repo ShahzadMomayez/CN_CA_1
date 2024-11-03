@@ -27,6 +27,72 @@ The first step is to get access to the camera and microphone of the user's devic
 ## 5. Encoding and Decoding Audio and Video:
 It is not an easy task to send a stream of audio and video data over the Internet. This is where encoding and decoding are used. This is the process of splitting up video frames and audio waves into smaller chunks and compressing them. This algorithm is called codec. There is an enormous amount of different codecs, which are maintained by different companies with different business goals. There are also many codecs inside WebRTC like Opus.
 
+
+##6. SignalingServer:
+To connect to another user you should know where he is located on the Web. The IP address of your device allows Internet-enabled devices to send data directly between each other. The RTCPeerConnection object is responsible for this. As soon as devices know how to find each other over the Internet, they start exchanging data about which protocols and codecs each device supports.
+
+To communicate with another user you simply need to exchange contact information and the rest will be done by WebRTC. The process of connecting to the other user is also known as signaling and negotiation. It consists of a few steps. including:
+
+
+    1. Create a list of potential candidates for a peer connection.
+
+    2. The user or an application selects a user to make a connection with.
+
+    3. The signaling layer notifies another user that someone want to connect to him. He can accept or decline.
+
+    4. The first user is notified of the acceptance of the offer.
+
+    5. The first user initiates RTCPeerConnection with another user.
+
+    6. Both users exchange software and hardware information through the signaling server.
+
+    7. Both users exchange location information.
+
+    8. The connection succeeds or fails.
+
+## 7. Building the Server
+
+The server we are going to build will be able to connect two users together who are not located on the same computer. We will create our own signaling mechanism. Our signaling server will allow one user to call another. Once a user has called another, the server passes the offer, answer, ICE candidates between them and setup a WebRTC connection.
+///image build server
+The above diagram is the messaging flow between users when using the signaling server. First of all, each user registers with the server. In our case, this will be a simple string username. Once users have registered, they are able to call each other. User 1 makes an offer with the user identifier he wishes to call. The other user should answers. Finally, ICE candidates are sent between users until they can make a connection.
+
+To create a WebRTC connection clients have to be able to transfer messages without using a WebRTC peer connection. This is where we will use HTML5 WebSockets – a bidirectional socket connection between two endpoints – a web server and a web browser. 
+
+##8. ICE Candidates
+
+The final part is handling ICE candidate between users. We use the same technique just passing messages between users. The main difference is that candidate messages might happen multiple times per user in any order.
+
+## Step-by-Step Guide to Creating a WebRTC Peer Connection
+Creating an RTCPeerConnection Object
+Start by creating an RTCPeerConnection object with the configuration for STUN servers. STUN servers help you discover your public IP address.
+
+Setting up the onicecandidate Event
+Set a handler for the onicecandidate event to receive and send ICE candidates. ICE candidates are network addresses that might be used to establish a connection with another peer.
+
+Setting up the ontrack Event
+Set a handler for the ontrack event to receive media streams from the other peer. This event is triggered when the other peer sends a media stream (like audio or video).
+
+Adding Local Media Streams
+Capture local media streams (such as audio and video) and add their tracks to the RTCPeerConnection.
+
+Managing ICE Candidates
+Gathering and Sending ICE Candidates: When your browser finds an ICE candidate, the onicecandidate event is triggered. You should send these candidates to the other peer, typically via a signaling server (like Socket.IO).
+
+Receiving and Adding ICE Candidates: On the receiving side, accept ICE candidates via the signaling server and add them to the RTCPeerConnection.
+
+Exchanging SDP (Session Description Protocol)
+Creating an SDP Offer: The peer initiating the call creates an SDP offer, which includes media parameters that can be sent and received.
+
+Handling the SDP Offer: The receiving peer sets the SDP offer as the remote description, then creates an SDP answer and sets it as the local description.
+
+Handling the SDP Answer: The initiating peer sets the received SDP answer as the remote description.
+
+Managing RTP (Real-time Transport Protocol)
+Adding Media Tracks: Add media tracks (audio and video) to the RTCPeerConnection. These tracks are automatically transmitted using RTP.
+
+Receiving Media Tracks: Configure the ontrack event to receive media tracks from the other peer and display them in the user interface.
+
+
 ## 6. here is our code:
 ![My Local Image](https://path-to-your-image.com/audioinputH.png)
 
