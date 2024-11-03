@@ -25,19 +25,20 @@ In our project, we used the Opus codec for both encoding and decoding audio, opt
 
 On the receiving end, the AudioOutput class takes the incoming compressed audio packets and decodes them using the Opus decoder. This decoding restores the audio to a near-original quality format, which is then fed into the QAudioSink for playback. By using Opus for both encoding and decoding, we achieved efficient data transmission and maintained high-quality, low-latency audio, essential for a smooth and natural communication experience in our distributed voice call application.
 
-here is the code for this approach:
+### audioinput.cpp:
+ 
 ![audioinput.cpp](https://github.com/ShahzadMomayez/CN_CA_1/blob/master/ReadmeFiles/audioinputCPP.png)
 
-Constructor:
+#### Constructor:
 Sets the audio format, specifying: Sample rate (48,000 Hz). Mono channel (1 channel). Int16 sample format, which is standard for Opus. Creates a new QAudioSource with the given devinfo and specified format. Initializes the Opus encoder with opus_encoder_create, checking for errors.
 
-start() Method:
+#### start() Method:
 Opens the QIODevice in write-only mode, indicating that audio data will be written to it. Starts capturing audio data with audioSource->start(this), setting this class as the audio receiver. Logs a message indicating the start of recording.
 
-stop() Method:
+#### stop() Method:
 Stops the audio source and closes the QIODevice. Logs a message indicating the end of recording.
 
-writeData() Method:
+### writeData() Method:
 Validates that the Opus encoder has been initialized. Checks if the audio frame size matches Opus requirements (120, 240, 480, 960, 1920, or 2880 samples). Encodes the data: The opus_encode function compresses the audio input, writing it to outputBuffer. If encoding succeeds, the encoded data is wrapped in a QByteArray and emitted with newDataAvailable. Returns the length of input data processed, allowing seamless streaming. This class allows real-time audio data capture and encoding, handling both the low-level Opus encoding requirements and the high-level Qt audio input functionality.
 
 ## 5. WebRTC:
