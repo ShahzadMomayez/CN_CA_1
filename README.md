@@ -99,6 +99,8 @@ In this project, WebRTC (Web Real-Time Communication) played a central role in e
 
 ![schema](https://github.com/ShahzadMomayez/CN_CA_1/blob/master/ReadmeFiles/webrtc-1.png)
 
+The above diagram is the messaging flow between users when using the signaling server. First of all, each user registers with the server. In our case, this will be a simple string username. Once users have registered, they are able to call each other. User 1 makes an offer with the user identifier he wishes to call. The other user should answers. Finally, ICE candidates are sent between users until they can make a connection.
+
 ### webrtc.cpp
 
 
@@ -164,7 +166,7 @@ Adds a remote ICE candidate after validating the candidate data and ensuring the
 
 #### Private Methods
 
-![private_methods]https://github.com/ShahzadMomayez/CN_CA_1/blob/master/ReadmeFiles/WebRTCPrivateMethods.png)
+![private_methods](https://github.com/ShahzadMomayez/CN_CA_1/blob/master/ReadmeFiles/WebRTCPrivateMethods.png)
 
 **readVariant:**  
 Parses the rtc::message_variant type into a QByteArray, handling different possible types like binary data or strings.
@@ -187,143 +189,140 @@ For the signaling server, we implemented a solution to manage the critical conne
 
 The server does not handle the media or voice data itself but operates purely as an intermediary for exchanging control messages, making it lightweight and efficient. The signalingserver class in our project manages these interactions by connecting to the WebSocket server, sending and receiving messages related to SDP and ICE candidates, and triggering the necessary functions to set up and update peer-to-peer connections. By centralizing the signaling process, we streamlined the initial connection setup, allowing peers to connect directly for voice data exchange without the server's involvement in the actual call. This approach supports scalability and maintains low-latency communication for real-time voice calls.
 
-## 7. Building the Server
+#### signalingserver.cpp
 
-The server we are going to build will be able to connect two users together who are not located on the same computer. We will create our own signaling mechanism. Our signaling server will allow one user to call another. Once a user has called another, the server passes the offer, answer, ICE candidates between them and setup a WebRTC connection.
-///image build server
-The above diagram is the messaging flow between users when using the signaling server. First of all, each user registers with the server. In our case, this will be a simple string username. Once users have registered, they are able to call each other. User 1 makes an offer with the user identifier he wishes to call. The other user should answers. Finally, ICE candidates are sent between users until they can make a connection.
+**Purpose:**  
+The `signalingserver.cpp` file implements the `SignalingServer` class, which handles signaling communication in a WebRTC-based voice call application. This class facilitates the exchange of Session Description Protocol (SDP) messages and Interactive Connectivity Establishment (ICE) candidates necessary for establishing peer-to-peer connections. The `signalingserver.cpp` file is essential for enabling communication between peers in the distributed voice call project. It manages the exchange of signaling information, such as SDP offers, SDP answers, and ICE candidates, facilitating the establishment of peer-to-peer connections using Socket.IO for reliable messaging.
 
-To create a WebRTC connection clients have to be able to transfer messages without using a WebRTC peer connection. This is where we will use HTML5 WebSockets – a bidirectional socket connection between two endpoints – a web server and a web browser. 
 
-##8. ICE Candidates
+**Constructor:**
+- **SignalingServer(QObject *parent):**  
+  Initializes the `SignalingServer` object and sets up socket handlers for incoming signaling events.
+
+**Methods:**
+
+1. **connectToServer(const std::string& url):**  
+   Connects the signaling client to the specified server URL.
+
+2. **setupSocketHandlers():**  
+   Configures event handlers for incoming signaling messages:
+   - **SDP Offer Handling:** Emits the `sdpOfferReceived` signal when an SDP offer is received.
+   - **SDP Answer Handling:** Emits the `sdpAnswerReceived` signal when an SDP answer is received.
+   - **ICE Candidate Handling:** Emits the `iceCandidateReceived` signal when an ICE candidate is received, passing the sender's ID and candidate string.
+
+3. **sendSDPOffer(const QString& sdp):**  
+   Sends an SDP offer to the signaling server. Constructs a message containing the SDP string and emits it.
+
+4. **sendSDPAnswer(const QString& sdp):**  
+   Sends an SDP answer to the signaling server. Constructs a message with the SDP string and emits it.
+
+5. **sendICECandidate(const std::string& targetId, const std::string& candidate):**  
+   Sends an ICE candidate to a target peer. Constructs a message containing the target peer's ID and the candidate string, then emits it.
+
+6. **answerSocket():**  
+   Emits an answer event to indicate that an answer is being sent.
+
+
+## 7. Building the signaling Server using NodeJs:
+
+
+**Purpose:**  
+The `signalingServer.js` file implements a signaling server using Node.js, Express, and Socket.IO. It facilitates the exchange of SDP offers, answers, and ICE candidates between clients, enabling WebRTC peer-to-peer connections.
+
+**Dependencies:**
+- **express:** Framework for building web applications.
+- **http:** Module to create an HTTP server.
+- **socket.io:** Library for real-time, bidirectional communication between web clients and servers.
+
+**Server Setup:**
+- Initializes an Express application and creates an HTTP server.
+- Sets up Socket.IO for real-time communication.
+- Defines two main objects: `clients` for tracking connected clients and `sdpBuffs` for buffering SDP messages.
+
+**Routes:**
+- **GET /**:  
+  Responds with a message indicating that the signaling server is running.
+
+**Socket.IO Connection Handling:**
+- **io.on('connection', (socket) => {...}):**  
+  Handles new client connections and sets up event listeners for each socket.
+
+1. **'sdp_offer' Event:**  
+   - Listens for SDP offers from clients.
+   - Logs the received SDP offer and associates it with the "offer" client.
+   - If the "answer" client is connected, emits the SDP offer to that client.
+   - If the "answer" client is not connected, buffers the offer for later use.
+   - If a buffered answer is available, sends it to the "offer" client.
+
+2. **'answer_event':**  
+   - Handles the connection event when a client identifies as the "answer" client.
+
+3. **'sdp_answer' Event:**  
+   - Listens for SDP answers from clients.
+   - Logs the received SDP answer and associates it with the "answer" client.
+   - If the "offer" client is connected, emits the SDP answer to that client.
+   - If the "offer" client is not connected, buffers the answer for later use.
+   - If a buffered offer is available, sends it to the "answer" client.
+
+4. **'disconnect' Event:**  
+   - Handles client disconnection.
+   - Removes the client from the `clients` object based on whether they were an "offer" or "answer" client.
+
+**Server Listening:**
+- The server listens on port 3000 and logs a message indicating that the signaling server is running.
+
+**Summary:**  
+The `signalingServer.js` file plays a vital role in managing signaling for WebRTC connections by facilitating the exchange of SDP offers and answers. It handles client connections, maintains state, and ensures reliable message delivery, enabling seamless peer-to-peer communication.
+
+## 8. ICE Candidates
 
 The final part is handling ICE candidate between users. We use the same technique just passing messages between users. The main difference is that candidate messages might happen multiple times per user in any order.
 
-## Step-by-Step Guide to Creating a WebRTC Peer Connection
-Creating an RTCPeerConnection Object
-Start by creating an RTCPeerConnection object with the configuration for STUN servers. STUN servers help you discover your public IP address.
+## UI Handler:
 
-Setting up the onicecandidate Event
-Set a handler for the onicecandidate event to receive and send ICE candidates. ICE candidates are network addresses that might be used to establish a connection with another peer.
+**Purpose:**  
+The `uihandler.cpp` file implements the `UIHandler` class, which manages user interface interactions and connects user actions to the underlying WebRTC functionality. It handles the initiation of calls, offers, answers, and manages audio input and output streams.
 
-Setting up the ontrack Event
-Set a handler for the ontrack event to receive media streams from the other peer. This event is triggered when the other peer sends a media stream (like audio or video).
+**Constructor:**
+- **UIHandler(QObject *parent):**  
+  Initializes the `UIHandler` object, sets up WebRTC and signaling server handlers, and connects to the signaling server at the specified URL.The `uihandler.cpp` file plays a crucial role in managing the user interface for the voice call application. It establishes connections, handles SDP offers and answers, and manages audio streams, providing a seamless experience for initiating and answering calls through WebRTC.
 
-Adding Local Media Streams
-Capture local media streams (such as audio and video) and add their tracks to the RTCPeerConnection.
+**Methods:**
 
-Managing ICE Candidates
-Gathering and Sending ICE Candidates: When your browser finds an ICE candidate, the onicecandidate event is triggered. You should send these candidates to the other peer, typically via a signaling server (like Socket.IO).
+1. **offer():**  
+   Initiates an offer to establish a WebRTC connection:
+   - Creates an instance of `AudioInput`.
+   - Initializes the WebRTC configuration for the "EOT-x" peer as the offerer.
+   - Connects signaling server's `sdpAnswerReceived` signal to the `setOfferSdp` slot.
+   - Connects WebRTC's `sdpGenerated` signal to send the SDP offer via the signaling server.
+   - Connects WebRTC's `trackIsOpen` signal to start the audio input.
+   - Connects `newDataAvailable` signal from `AudioInput` to send audio data to the WebRTC instance.
+   - Adds the peer "answerer" and generates an SDP offer.
 
-Receiving and Adding ICE Candidates: On the receiving side, accept ICE candidates via the signaling server and add them to the RTCPeerConnection.
+2. **answer():**  
+   Prepares to answer a WebRTC call:
+   - Creates an instance of `AudioOutput`.
+   - Initializes the WebRTC configuration for the "EOT-x" peer as the answerer.
+   - Connects WebRTC's `sdpGenerated` signal to send the SDP answer via the signaling server.
+   - Connects signaling server's `sdpOfferReceived` signal to the `setAnswerSdp` slot.
+   - Connects WebRTC's `trackIsOpen` signal to start the audio output.
+   - Connects `packetReceived` signal from WebRTC to add audio data to the `AudioOutput`.
+   - Emits an answer socket event to the signaling server.
+   - Adds the peer "offerer".
 
-Exchanging SDP (Session Description Protocol)
-Creating an SDP Offer: The peer initiating the call creates an SDP offer, which includes media parameters that can be sent and received.
+3. **setAnswerSdp(const QString &sdp):**  
+   Sets the remote description for the "offerer" peer with the received SDP answer.
 
-Handling the SDP Offer: The receiving peer sets the SDP offer as the remote description, then creates an SDP answer and sets it as the local description.
+4. **setOfferSdp(const QString &sdp):**  
+   Sets the remote description for the "answerer" peer with the received SDP offer.
 
-Handling the SDP Answer: The initiating peer sets the received SDP answer as the remote description.
-
-Managing RTP (Real-time Transport Protocol)
-Adding Media Tracks: Add media tracks (audio and video) to the RTCPeerConnection. These tracks are automatically transmitted using RTP.
-
-Receiving Media Tracks: Configure the ontrack event to receive media tracks from the other peer and display them in the user interface.
-
-
-## 6. here is our code:
-![My Local Image](https://path-to-your-image.com/audioinputH.png)
-
-## AudioInput
-### Constructor:
-
-Sets the audio format, specifying:
-Sample rate (48,000 Hz).
-Mono channel (1 channel).
-Int16 sample format, which is standard for Opus.
-Creates a new QAudioSource with the given devinfo and specified format.
-Initializes the Opus encoder with opus_encoder_create, checking for errors.
-
-#### start() Method:
-Opens the QIODevice in write-only mode, indicating that audio data will be written to it.
-Starts capturing audio data with audioSource->start(this), setting this class as the audio receiver.
-Logs a message indicating the start of recording.
-
-#### stop() Method:
-Stops the audio source and closes the QIODevice.
-Logs a message indicating the end of recording.
-
-#### writeData() Method:
-Validates that the Opus encoder has been initialized.
-Checks if the audio frame size matches Opus requirements (120, 240, 480, 960, 1920, or 2880 samples).
-Encodes the data:
-The opus_encode function compresses the audio input, writing it to outputBuffer.
-If encoding succeeds, the encoded data is wrapped in a QByteArray and emitted with newDataAvailable.
-Returns the length of input data processed, allowing seamless streaming.
-This class allows real-time audio data capture and encoding, handling both the low-level Opus encoding requirements and the high-level Qt audio input functionality.
+5. **sendData(const QByteArray &data):**  
+   Sends audio data to the "answerer" peer using the WebRTC instance.
 
 
-## AudioOutput:
-Here’s an in-depth explanation of the functions in the `.cpp` file for `AudioOutput`, focusing on each function’s role in managing audio playback and decoding:
 
-### 1. **Constructor (`AudioOutput::AudioOutput(QObject *parent)`)**
-   - **Purpose**: Initializes the audio playback setup and the Opus decoder.
-   - **Key Steps**:
-     - **Audio Format Setup**:
-       - Creates a `QAudioFormat` instance to specify the audio properties:
-         - **Sample Rate**: 48,000 Hz (matches the Opus codec standard for voice).
-         - **Channel Count**: 1 (mono, as voice typically requires only a single channel).
-         - **Sample Format**: `Int16` (16-bit integer samples), which Opus encoding and decoding expect.
-     - **Audio Sink Initialization**:
-       - Instantiates a `QAudioSink` with the specified `QAudioFormat`. This sink acts as the interface for audio playback.
-       - Calls `audioSink->start()` to start the sink, which initializes a `QIODevice` (`audioDevice`) for writing the audio data directly to the audio output.
-     - **Opus Decoder Initialization**:
-       - Calls `opus_decoder_create`, which sets up the Opus decoder with:
-         - **Sample Rate**: 48,000 Hz.
-         - **Channel Count**: 1 (mono).
-       - Stores any error encountered in `opusError` and logs a warning if initialization fails.
 
-### 2. **`start()` Method**
-   - **Purpose**: Starts the audio output for playback.
-   - **Functionality**:
-     - Calls `audioSink->start()` to (re)initialize `audioDevice` and begin audio playback.
-     - This ensures `audioDevice` is set up and ready to receive audio data for output.
-   - **Why It’s Needed**: This is useful for restarting playback if it was previously stopped or if reinitialization is required.
 
-### 3. **`stop()` Method**
-   - **Purpose**: Stops audio playback and cleans up resources.
-   - **Functionality**:
-     - Calls `audioSink->stop()` to halt audio output.
-     - Destroys the Opus decoder using `opus_decoder_destroy`, freeing up resources allocated to the decoder.
-   - **Why It’s Needed**: This method ensures that playback stops cleanly and any allocated resources are released, preventing memory leaks.
 
-### 4. **`addData()` Slot**
-   - **Purpose**: Processes incoming encoded audio data, decodes it, and writes the decoded data to the audio device for playback.
-   - **Functionality**:
-     - **Thread Safety**:
-       - Uses `QMutexLocker locker(&mutex);` to ensure that only one thread at a time can execute this function. This is crucial in a real-time application where audio data may arrive concurrently.
-     - **Decoding Data**:
-       - Allocates a buffer `decodedData` of `opus_int16` type (16-bit samples) to hold the decoded output.
-       - Calls `opus_decode` to decode the incoming Opus-encoded audio data (`data`):
-         - `opus_decode` converts the compressed audio data in `data` into raw PCM audio samples, storing them in `decodedData`.
-         - If decoding fails (i.e., `decodedSamples < 0`), it logs a warning and exits the function.
-       - Converts the decoded data into a `QByteArray` (`rawData`) for easier handling.
-       - Writes `rawData` directly to `audioDevice`, which plays the decoded audio through the audio sink.
-   - **Why It’s Needed**: This function is called whenever new audio data arrives. It decodes the compressed data and sends it to the audio output, enabling real-time audio playback for a voice call.
-
-### Summary
-Each function in `AudioOutput.cpp` serves a specific role in enabling real-time, decoded audio playback:
-- The **constructor** initializes necessary components (audio format, audio sink, and Opus decoder).
-- **`start()`** and **`stop()`** manage the audio sink’s lifecycle for starting and stopping playback.
-- **`addData()`** decodes incoming audio data and plays it in real time, supporting continuous, seamless playback in a voice communication setup.
-
-## WebRTC:
-//image
-In a WebRTC application, the signaling server isn’t directly involved in transmitting media. Instead, it facilitates the exchange of metadata required to set up a direct connection between peers. Here’s a quick recap of how the SignalingServer class works as part of this process:
-
-1. Connection: connectToServer() establishes the connection to the signaling server, creating the foundation for exchanging data.
-2. Event Listeners: setupSocketHandlers() defines how the application should respond to incoming SDP and ICE data.
-3. Data Sending: sendSDP() and sendICECandidate() send SDP and ICE candidate information to the server, which it then forwards to other peers.
-4. Signals: The class emits sdpReceived and iceCandidateReceived signals to notify the application when new SDP or ICE candidate data is received from the server.
-This SignalingServer class acts as an intermediary in the signaling process, bridging the initial connection between peers and enabling the exchange of SDP and ICE data necessary for setting up the WebRTC connection for our distributed voice call application.
 
 
