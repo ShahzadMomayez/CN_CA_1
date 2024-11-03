@@ -322,7 +322,7 @@ The `uihandler.cpp` file implements the `UIHandler` class, which manages user in
 
 ![answersdp](https://github.com/ShahzadMomayez/CN_CA_1/blob/master/ReadmeFiles/uihandlerCPP2.png)
 
-    Sets the remote description for the "offerer" peer with the received SDP answer.
+   Sets the remote description for the "offerer" peer with the received SDP answer.
 
 5. **setOfferSdp(const QString &sdp):**  
    Sets the remote description for the "answerer" peer with the received SDP offer.
