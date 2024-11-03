@@ -17,7 +17,6 @@ void SignalingServer::connectToServer(const std::string& url)
 
 void SignalingServer::setupSocketHandlers()
 {
-    // Handle incoming SDP offers
     socketClient.socket()->on("sdp_offer", [&](sio::event& ev) {
         std::string message = ev.get_message()->get_string();
         emit sdpOfferReceived(QString::fromStdString(message));
@@ -25,7 +24,6 @@ void SignalingServer::setupSocketHandlers()
 
     });
 
-    // Handle incoming SDP answers
     socketClient.socket()->on("sdp_answer", [&](sio::event& ev) {
         std::string message =  ev.get_message()->get_string();
         emit sdpAnswerReceived(QString::fromStdString(message));

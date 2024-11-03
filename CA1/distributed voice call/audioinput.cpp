@@ -49,7 +49,7 @@ qint64 AudioInput::writeData(const char *data, qint64 len) {
     }
 
     QByteArray encodedData(reinterpret_cast<char *>(outputBuffer), encodedBytes);
-    emit newDataAvailable(encodedData);  //  signal with encoded data
+    emit newDataAvailable(encodedData);
 
     return len;
 
