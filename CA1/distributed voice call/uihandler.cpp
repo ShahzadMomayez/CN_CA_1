@@ -9,8 +9,6 @@ UIHandler::UIHandler(QObject *parent)
     webRTC = new WebRTC();
     signalingServerHandler = new SignalingServer();
     signalingServerHandler->connectToServer("http://localhost:3000");
-
-    // Connect the signaling server's sdpReceived signal to the setAnswerSdp slot
 }
 
 void UIHandler::offer()
@@ -37,13 +35,10 @@ void UIHandler::answer()
     signalingServerHandler->answerSocket();
 
     webRTC->addPeer("offerer");
-    // webRTC->setRemoteDescription()
-    // webRTC->generateAnswerSDP("offerer");
 }
 
 void UIHandler::setAnswerSdp(const QString &sdp)
 {
-    // qDebug() << "Received SDP:" << sdp;  // Debug output to verify the correct SDP is received
     webRTC->setRemoteDescription("offerer", sdp);
 }
 
@@ -54,6 +49,5 @@ void UIHandler::setOfferSdp(const QString &sdp)
 
 void UIHandler::sendData(const QByteArray &data)
 {
-    // qDebug()<< "sending";
     webRTC->sendTrack("answerer",data);
 }

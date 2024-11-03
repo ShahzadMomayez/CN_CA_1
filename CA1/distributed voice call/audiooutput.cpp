@@ -9,13 +9,12 @@ AudioOutput::AudioOutput(QObject *parent) : QObject(parent) {
     format.setSampleFormat(QAudioFormat::Int16);
 
     audioSink = new QAudioSink(format, this);
-    // opus decoder
     opusDecoder = opus_decoder_create(48000, 1, &opusError);
     if (opusError != OPUS_OK) {
         qWarning("Failed to create Opus decoder: %s", opus_strerror(opusError));
     }
 
-    audioDevice = audioSink->start();  // start audio output
+    audioDevice = audioSink->start();
 }
 
 void AudioOutput::start() {
@@ -31,7 +30,7 @@ void AudioOutput::stop() {
 void AudioOutput::addData(const QByteArray &data) {
     QMutexLocker locker(&mutex);
 
-    opus_int16 decodedData[4096];  // audio bufer
+    opus_int16 decodedData[4096];
     int decodedSamples = opus_decode(opusDecoder, (const unsigned char *)data.data(), data.size(), decodedData, sizeof(decodedData) / 2, 0);
 
     if (decodedSamples < 0) {
@@ -40,5 +39,5 @@ void AudioOutput::addData(const QByteArray &data) {
     }
 
     QByteArray rawData(reinterpret_cast<char *>(decodedData), decodedSamples * sizeof(opus_int16));
-    audioDevice->write(rawData);  // writing  decoded data to audio output
+    audioDevice->write(rawData);
 }

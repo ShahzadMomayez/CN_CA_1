@@ -32,11 +32,9 @@ void SignalingServer::setupSocketHandlers()
         qDebug() << "SDP Answer received:" << QString::fromStdString(message);
     });
 
-    // Handle incoming ICE candidates
     socketClient.socket()->on("ice_candidate", [&](sio::event& ev) {
         std::string senderId = ev.get_message()->get_map()["senderId"]->get_string();
         std::string candidate = ev.get_message()->get_map()["candidate"]->get_string();
-        // Emit the signal with QString parameters
         emit iceCandidateReceived(QString::fromStdString(senderId), QString::fromStdString(candidate));
         qDebug() << "ICE Candidate received from:" << QString::fromStdString(senderId) << "Candidate:" << QString::fromStdString(candidate);
     });
@@ -46,14 +44,14 @@ void SignalingServer::sendSDPOffer(const QString& sdp) {
     sio::message::ptr msg = sio::object_message::create();
     msg->get_map()["sdp"] = sio::string_message::create(sdp.toStdString());
 
-    socketClient.socket()->khosro_emit("sdp_offer", sdp.toStdString());  // Ensure using emit
+    socketClient.socket()->khosro_emit("sdp_offer", sdp.toStdString());
     qDebug() << "SDP Offer sent:" << sdp;
 }
 
 void SignalingServer::sendSDPAnswer(const QString& sdp) {
     sio::message::ptr msg = sio::object_message::create();
     msg->get_map()["sdp"] = sio::string_message::create(sdp.toStdString());
-    socketClient.socket()->khosro_emit("sdp_answer", sdp.toStdString());  // Ensure using emit
+    socketClient.socket()->khosro_emit("sdp_answer", sdp.toStdString());
     qDebug() << "SDP Answer sent:" << sdp;
 }
 
@@ -69,6 +67,6 @@ void SignalingServer::sendICECandidate(const std::string& targetId, const std::s
 
 void SignalingServer::answerSocket()
 {
-    socketClient.socket()->khosro_emit("answer_event"); // Update to a meaningful event name
+    socketClient.socket()->khosro_emit("answer_event");
     qDebug() << "Answer socket emitted";
 }

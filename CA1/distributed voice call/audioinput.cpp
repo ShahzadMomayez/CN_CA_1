@@ -8,7 +8,6 @@ AudioInput::AudioInput(QObject *parent) : QIODevice(parent) {
     format.setSampleFormat(QAudioFormat::Int16);
 
     audioSource = new QAudioSource(format, this);
-    // oppus encoder
     opusEncoder = opus_encoder_create(48000, 1, OPUS_APPLICATION_AUDIO, &opusError);
     if (opusError != OPUS_OK) {
         qWarning("Failed to create Opus encoder: %s", opus_strerror(opusError));
@@ -16,33 +15,31 @@ AudioInput::AudioInput(QObject *parent) : QIODevice(parent) {
 }
 
 void AudioInput::start() {
-    open(QIODevice::WriteOnly);  // Open  for writing
-    audioSource->start(this);    // start audio source with this device
+    open(QIODevice::WriteOnly);
+    audioSource->start(this);
     qDebug() << "Recording started...";
 }
 
 void AudioInput::stop() {
     audioSource->stop();
-    close();  // Close  QIODevice
+    close();
     qDebug() << "Recording stopped...";
 }
 
 qint64 AudioInput::writeData(const char *data, qint64 len) {
     if (opusEncoder == nullptr) {
-        return -1;  // encoder  is not  initialized
+        return -1;
     }
 
     opus_int16 inputBuffer[48000];
     int inputFrameSize = len / sizeof(opus_int16);
 
-    // valid frame size for opus
     if (inputFrameSize != 120 && inputFrameSize != 240 && inputFrameSize != 480 &&
         inputFrameSize != 960 && inputFrameSize != 1920 && inputFrameSize != 2880) {
         qWarning("Invalid frame size for Opus encoding: %d", inputFrameSize);
         return -1;
     }
 
-    //  encoded data buffer
     unsigned char outputBuffer[4000];
     int encodedBytes = opus_encode(opusEncoder, (const opus_int16 *)data, inputFrameSize, outputBuffer, sizeof(outputBuffer));
 

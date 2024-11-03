@@ -12,16 +12,16 @@ public:
     explicit SignalingServer(QObject *parent = nullptr);
     void connectToServer(const std::string& url);
     //void sendSDP(const QString& sdp);
-    void sendSDPOffer(const QString& sdp);  //
-    void sendSDPAnswer(const QString& sdp); //
+    void sendSDPOffer(const QString& sdp);
+    void sendSDPAnswer(const QString& sdp);
     void sendICECandidate(const std::string& targetId, const std::string& candidate);
     void answerSocket();
 
 signals:
     void sdpReceived(const QString sdp);
-    void sdpOfferReceived(const QString sdp);  //
-    void sdpAnswerReceived(const QString sdp); //
- //   void iceCandidateReceived(const std::string& senderId, const std::string& candidate);
+    void sdpOfferReceived(const QString sdp);
+    void sdpAnswerReceived(const QString sdp);
+ // void iceCandidateReceived(const std::string& senderId, const std::string& candidate);
     void iceCandidateReceived(const QString& senderId, const QString& candidate);
 
 private:

@@ -7,7 +7,7 @@ const server = http.createServer(app);
 const io = socketIo(server);
 
 let clients = {};
-let sdpBuffs = {}; //with logs
+let sdpBuffs = {}; // Buffer for SDPs when the counterpart is not yet connected
 
 app.get('/', (req, res) => {
     res.send('Signaling server is running');
@@ -22,52 +22,50 @@ io.on('connection', (socket) => {
 
             console.log(`Received SDP Offer from socket: ${socket.id}`);
 
-            clients["offer"] = socket; 
+            clients["offer"] = socket; // Store the offerer
 
+            // Send offer to the answerer if available
             if (clients["answer"]) {
                 console.log(`Sending SDP Offer to answerer: ${clients["answer"].id}`);
-                clients["answer"].emit("sdp_offer",sdp); 
-                console.log("aaaaa");
+                clients["answer"].emit("sdp_offer", JSON.stringify({ sdp: sdp })); // Emit with event name
             } else {
                 console.log(`Buffering offer SDP since answerer is not connected`);
-                sdpBuffs["offer"] = sdp; 
+                sdpBuffs["offer"] = sdp; // Buffer offer if answerer is not connected
             }
 
+            // Send buffered answer if available
             if (sdpBuffs["answer"]) {
                 console.log(`Sending buffered answer SDP to offerer: ${socket.id}`);
-                socket.emit("sdp_answer",  sdpBuffs["answer"] );
-                delete sdpBuffs["answer"]; 
+                socket.emit("sdp_answer", JSON.stringify({ sdp: sdpBuffs["answer"] })); // Emit buffered answer
+                delete sdpBuffs["answer"]; // Clear the buffered answer
             }
         } catch (error) {
             console.error("Error parsing SDP offer:", error);
         }
     });
-    socket.on('answer_event', (data)=>{
-        console.log("Connection");
-        clients["answer"] = socket;
-    }
-  );
+
     socket.on('sdp_answer', (data) => {
         try {
             const sdp = data;
 
             console.log(`Received SDP Answer from socket: ${socket.id}`);
 
-            clients["answer"] = socket; 
+            clients["answer"] = socket; // Store the answerer
 
-            
+            // Send answer to the offerer if available
             if (clients["offer"]) {
                 console.log(`Sending SDP Answer to offerer: ${clients["offer"].id}`);
-                clients["offer"].emit("sdp_answer", sdp ); 
+                clients["offer"].emit("sdp_answer", JSON.stringify({ sdp: sdp })); // Emit with event name
             } else {
                 console.log(`Buffering answer SDP since offerer is not connected`);
-                sdpBuffs["answer"] = sdp; 
+                sdpBuffs["answer"] = sdp; // Buffer answer if offerer is not connected
             }
 
+            // Send buffered offer if available
             if (sdpBuffs["offer"]) {
                 console.log(`Sending buffered offer SDP to answerer: ${socket.id}`);
-                socket.emit("sdp_offer",  sdpBuffs["offer"] ); 
-                delete sdpBuffs["offer"]; 
+                socket.emit("sdp_offer", JSON.stringify({ sdp: sdpBuffs["offer"] })); // Emit buffered offer
+                delete sdpBuffs["offer"]; // Clear the buffered offer
             }
         } catch (error) {
             console.error("Error parsing SDP answer:", error);
@@ -76,6 +74,7 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
         console.log(`Client disconnected: ${socket.id}`);
+        // Clean up clients
         if (clients["offer"] && clients["offer"].id === socket.id) {
             delete clients["offer"];
         }

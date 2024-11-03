@@ -12,11 +12,7 @@
 
 int main(int argc, char *argv[])
 {
-    // WebRTC webRtc ;
-    // webRtc.init("EOT-x",true);
-    // webRtc.addPeer("4");
-    // webRtc.generateOfferSDP("4");
-    qDebug()<< "kaasdfghjrgahi";
+    qDebug()<< "start main ....";
     QGuiApplication app(argc, argv); // Use QGuiApplication instead of QCoreApplication
 
     QQmlApplicationEngine engine;
@@ -34,7 +30,6 @@ int main(int argc, char *argv[])
 
     if (engine.rootObjects().isEmpty())
         return -1;
-
 
 
     return app.exec();
