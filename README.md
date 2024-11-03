@@ -194,6 +194,7 @@ The server does not handle the media or voice data itself but operates purely as
 **Purpose:**  
 The `signalingserver.cpp` file implements the `SignalingServer` class, which handles signaling communication in a WebRTC-based voice call application. This class facilitates the exchange of Session Description Protocol (SDP) messages and Interactive Connectivity Establishment (ICE) candidates necessary for establishing peer-to-peer connections. The `signalingserver.cpp` file is essential for enabling communication between peers in the distributed voice call project. It manages the exchange of signaling information, such as SDP offers, SDP answers, and ICE candidates, facilitating the establishment of peer-to-peer connections using Socket.IO for reliable messaging.
 
+![signalingserver](https://github.com/ShahzadMomayez/CN_CA_1/blob/master/ReadmeFiles/signalingServerCPP.png)
 
 **Constructor:**
 - **SignalingServer(QObject *parent):**  
@@ -211,19 +212,24 @@ The `signalingserver.cpp` file implements the `SignalingServer` class, which han
    - **ICE Candidate Handling:** Emits the `iceCandidateReceived` signal when an ICE candidate is received, passing the sender's ID and candidate string.
 
 3. **sendSDPOffer(const QString& sdp):**  
-   Sends an SDP offer to the signaling server. Constructs a message containing the SDP string and emits it.
 
-4. **sendSDPAnswer(const QString& sdp):**  
+![sendsdp](https://github.com/ShahzadMomayez/CN_CA_1/blob/master/ReadmeFiles/signalingServer2.png)
+
+    Sends an SDP offer to the signaling server. Constructs a message containing the SDP string and emits it.
+
+5. **sendSDPAnswer(const QString& sdp):**  
    Sends an SDP answer to the signaling server. Constructs a message with the SDP string and emits it.
 
-5. **sendICECandidate(const std::string& targetId, const std::string& candidate):**  
+6. **sendICECandidate(const std::string& targetId, const std::string& candidate):**  
    Sends an ICE candidate to a target peer. Constructs a message containing the target peer's ID and the candidate string, then emits it.
 
-6. **answerSocket():**  
+7. **answerSocket():**  
    Emits an answer event to indicate that an answer is being sent.
 
 
 ## 7. Building the signaling Server using NodeJs:
+
+![schemaa](https://github.com/ShahzadMomayez/CN_CA_1/blob/master/ReadmeFiles/BuildingServer.png)
 
 
 **Purpose:**  
@@ -277,8 +283,13 @@ The `signalingServer.js` file plays a vital role in managing signaling for WebRT
 
 ## 8. UI Handler:
 
+
+
 **Purpose:**  
 The `uihandler.cpp` file implements the `UIHandler` class, which manages user interface interactions and connects user actions to the underlying WebRTC functionality. It handles the initiation of calls, offers, answers, and manages audio input and output streams.
+
+![uihandler](https://github.com/ShahzadMomayez/CN_CA_1/blob/master/ReadmeFiles/uihandlerCPP1.png)
+
 
 **Constructor:**
 - **UIHandler(QObject *parent):**  
@@ -308,12 +319,15 @@ The `uihandler.cpp` file implements the `UIHandler` class, which manages user in
    - Adds the peer "offerer".
 
 3. **setAnswerSdp(const QString &sdp):**  
-   Sets the remote description for the "offerer" peer with the received SDP answer.
 
-4. **setOfferSdp(const QString &sdp):**  
+![answersdp](https://github.com/ShahzadMomayez/CN_CA_1/blob/master/ReadmeFiles/uihandlerCPP2.png)
+
+    Sets the remote description for the "offerer" peer with the received SDP answer.
+
+5. **setOfferSdp(const QString &sdp):**  
    Sets the remote description for the "answerer" peer with the received SDP offer.
 
-5. **sendData(const QByteArray &data):**  
+6. **sendData(const QByteArray &data):**  
    Sends audio data to the "answerer" peer using the WebRTC instance.
 
 
