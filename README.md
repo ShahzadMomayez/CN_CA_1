@@ -47,49 +47,49 @@ NOTE :we use a header file for the audioinput class as part of organizing the co
 
 ![audiooutput.cpp](https://github.com/ShahzadMomayez/CN_CA_1/blob/master/ReadmeFiles/audioOutputCPP.png)
 
-#### 1.  Constructor (`AudioOutput::AudioOutput(QObject *parent)`) 
+#### 1.  Constructor ( AudioOutput::AudioOutput(QObject *parent) ) 
    -  Purpose : Initializes the audio playback setup and the Opus decoder.
    -  Key Steps :
      -  Audio Format Setup :
-       - Creates a `QAudioFormat` instance to specify the audio properties:
+       - Creates a  QAudioFormat  instance to specify the audio properties:
          -  Sample Rate : 48,000 Hz (matches the Opus codec standard for voice).
          -  Channel Count : 1 (mono, as voice typically requires only a single channel).
-         -  Sample Format : `Int16` (16-bit integer samples), which Opus encoding and decoding expect.
+         -  Sample Format :  Int16  (16-bit integer samples), which Opus encoding and decoding expect.
      -  Audio Sink Initialization :
-       - Instantiates a `QAudioSink` with the specified `QAudioFormat`. This sink acts as the interface for audio playback.
-       - Calls `audioSink->start()` to start the sink, which initializes a `QIODevice` (`audioDevice`) for writing the audio data directly to the audio output.
+       - Instantiates a  QAudioSink  with the specified  QAudioFormat . This sink acts as the interface for audio playback.
+       - Calls  audioSink->start()  to start the sink, which initializes a  QIODevice  ( audioDevice ) for writing the audio data directly to the audio output.
      -  Opus Decoder Initialization :
-       - Calls `opus_decoder_create`, which sets up the Opus decoder with:
+       - Calls  opus_decoder_create , which sets up the Opus decoder with:
          - Sample Rate: 48,000 Hz.
          -  Channel Count : 1 (mono).
-       - Stores any error encountered in `opusError` and logs a warning if initialization fails.
+       - Stores any error encountered in  opusError  and logs a warning if initialization fails.
 
-### 2.  `start()` Method 
+### 2.   start()  Method 
    -  Purpose : Starts the audio output for playback.
    -  Functionality :
-     - Calls `audioSink->start()` to (re)initialize `audioDevice` and begin audio playback.
-     - This ensures `audioDevice` is set up and ready to receive audio data for output.
+     - Calls  audioSink->start()  to (re)initialize  audioDevice  and begin audio playback.
+     - This ensures  audioDevice  is set up and ready to receive audio data for output.
    -  Why It’s Needed : This is useful for restarting playback if it was previously stopped or if reinitialization is required.
 
-### 3.  `stop()` Method 
+### 3.   stop()  Method 
    -  Purpose : Stops audio playback and cleans up resources.
    -  Functionality :
-     - Calls `audioSink->stop()` to halt audio output.
-     - Destroys the Opus decoder using `opus_decoder_destroy`, freeing up resources allocated to the decoder.
+     - Calls  audioSink->stop()  to halt audio output.
+     - Destroys the Opus decoder using  opus_decoder_destroy , freeing up resources allocated to the decoder.
    -  Why It’s Needed : This method ensures that playback stops cleanly and any allocated resources are released, preventing memory leaks.
 
-### 4.  `addData()` Slot 
+### 4.   addData()  Slot 
    -  Purpose : Processes incoming encoded audio data, decodes it, and writes the decoded data to the audio device for playback.
    -  Functionality :
      -  Thread Safety :
-       - Uses `QMutexLocker locker(&mutex);` to ensure that only one thread at a time can execute this function. This is crucial in a real-time application where audio data may arrive concurrently.
+       - Uses  QMutexLocker locker(&mutex);  to ensure that only one thread at a time can execute this function. This is crucial in a real-time application where audio data may arrive concurrently.
      -  Decoding Data :
-       - Allocates a buffer `decodedData` of `opus_int16` type (16-bit samples) to hold the decoded output.
-       - Calls `opus_decode` to decode the incoming Opus-encoded audio data (`data`):
-         - `opus_decode` converts the compressed audio data in `data` into raw PCM audio samples, storing them in `decodedData`.
-         - If decoding fails (i.e., `decodedSamples < 0`), it logs a warning and exits the function.
-       - Converts the decoded data into a `QByteArray` (`rawData`) for easier handling.
-       - Writes `rawData` directly to `audioDevice`, which plays the decoded audio through the audio sink.
+       - Allocates a buffer  decodedData  of  opus_int16  type (16-bit samples) to hold the decoded output.
+       - Calls  opus_decode  to decode the incoming Opus-encoded audio data ( data ):
+         -  opus_decode  converts the compressed audio data in  data  into raw PCM audio samples, storing them in  decodedData .
+         - If decoding fails (i.e.,  decodedSamples < 0 ), it logs a warning and exits the function.
+       - Converts the decoded data into a  QByteArray  ( rawData ) for easier handling.
+       - Writes  rawData  directly to  audioDevice , which plays the decoded audio through the audio sink.
    -  Why It’s Needed : This function is called whenever new audio data arrives. It decodes the compressed data and sends it to the audio output, enabling real-time audio playback for a voice call.
 
 
@@ -192,13 +192,13 @@ The server does not handle the media or voice data itself but operates purely as
 #### signalingserver.cpp
 
  Purpose:   
-The `signalingserver.cpp` file implements the `SignalingServer` class, which handles signaling communication in a WebRTC-based voice call application. This class facilitates the exchange of Session Description Protocol (SDP) messages and Interactive Connectivity Establishment (ICE) candidates necessary for establishing peer-to-peer connections. The `signalingserver.cpp` file is essential for enabling communication between peers in the distributed voice call project. It manages the exchange of signaling information, such as SDP offers, SDP answers, and ICE candidates, facilitating the establishment of peer-to-peer connections using Socket.IO for reliable messaging.
+The  signalingserver.cpp  file implements the  SignalingServer  class, which handles signaling communication in a WebRTC-based voice call application. This class facilitates the exchange of Session Description Protocol (SDP) messages and Interactive Connectivity Establishment (ICE) candidates necessary for establishing peer-to-peer connections. The  signalingserver.cpp  file is essential for enabling communication between peers in the distributed voice call project. It manages the exchange of signaling information, such as SDP offers, SDP answers, and ICE candidates, facilitating the establishment of peer-to-peer connections using Socket.IO for reliable messaging.
 
 ![signalingserver](https://github.com/ShahzadMomayez/CN_CA_1/blob/master/ReadmeFiles/signalingServerCPP.png)
 
  Constructor: 
 -  SignalingServer(QObject *parent):   
-  Initializes the `SignalingServer` object and sets up socket handlers for incoming signaling events.
+  Initializes the  SignalingServer  object and sets up socket handlers for incoming signaling events.
 
  Methods: 
 
@@ -207,9 +207,9 @@ The `signalingserver.cpp` file implements the `SignalingServer` class, which han
 
 2.  setupSocketHandlers():   
    Configures event handlers for incoming signaling messages:
-   -  SDP Offer Handling:  Emits the `sdpOfferReceived` signal when an SDP offer is received.
-   -  SDP Answer Handling:  Emits the `sdpAnswerReceived` signal when an SDP answer is received.
-   -  ICE Candidate Handling:  Emits the `iceCandidateReceived` signal when an ICE candidate is received, passing the sender's ID and candidate string.
+   -  SDP Offer Handling:  Emits the  sdpOfferReceived  signal when an SDP offer is received.
+   -  SDP Answer Handling:  Emits the  sdpAnswerReceived  signal when an SDP answer is received.
+   -  ICE Candidate Handling:  Emits the  iceCandidateReceived  signal when an ICE candidate is received, passing the sender's ID and candidate string.
 
 3.  sendSDPOffer(const QString& sdp):   
 
@@ -233,7 +233,7 @@ The `signalingserver.cpp` file implements the `SignalingServer` class, which han
 
 
  Purpose:   
-The `signalingServer.js` file implements a signaling server using Node.js, Express, and Socket.IO. It facilitates the exchange of SDP offers, answers, and ICE candidates between clients, enabling WebRTC peer-to-peer connections.
+The  signalingServer.js  file implements a signaling server using Node.js, Express, and Socket.IO. It facilitates the exchange of SDP offers, answers, and ICE candidates between clients, enabling WebRTC peer-to-peer connections.
 
  Dependencies: 
 -  express:  Framework for building web applications.
@@ -243,7 +243,7 @@ The `signalingServer.js` file implements a signaling server using Node.js, Expre
  Server Setup: 
 - Initializes an Express application and creates an HTTP server.
 - Sets up Socket.IO for real-time communication.
-- Defines two main objects: `clients` for tracking connected clients and `sdpBuffs` for buffering SDP messages.
+- Defines two main objects:  clients  for tracking connected clients and  sdpBuffs  for buffering SDP messages.
 
  Routes: 
 -  GET / :  
@@ -272,13 +272,13 @@ The `signalingServer.js` file implements a signaling server using Node.js, Expre
 
 4.  'disconnect' Event:   
    - Handles client disconnection.
-   - Removes the client from the `clients` object based on whether they were an "offer" or "answer" client.
+   - Removes the client from the  clients  object based on whether they were an "offer" or "answer" client.
 
  Server Listening: 
 - The server listens on port 3000 and logs a message indicating that the signaling server is running.
 
  Summary:   
-The `signalingServer.js` file plays a vital role in managing signaling for WebRTC connections by facilitating the exchange of SDP offers and answers. It handles client connections, maintains state, and ensures reliable message delivery, enabling seamless peer-to-peer communication.
+The  signalingServer.js  file plays a vital role in managing signaling for WebRTC connections by facilitating the exchange of SDP offers and answers. It handles client connections, maintains state, and ensures reliable message delivery, enabling seamless peer-to-peer communication.
 
 
 ## 8. UI Handler:
@@ -286,35 +286,35 @@ The `signalingServer.js` file plays a vital role in managing signaling for WebRT
 
 
  Purpose:   
-The `uihandler.cpp` file implements the `UIHandler` class, which manages user interface interactions and connects user actions to the underlying WebRTC functionality. It handles the initiation of calls, offers, answers, and manages audio input and output streams.
+The  uihandler.cpp  file implements the  UIHandler  class, which manages user interface interactions and connects user actions to the underlying WebRTC functionality. It handles the initiation of calls, offers, answers, and manages audio input and output streams.
 
 ![uihandler](https://github.com/ShahzadMomayez/CN_CA_1/blob/master/ReadmeFiles/uihandlerCPP1.png)
 
 
  Constructor: 
 -  UIHandler(QObject *parent):   
-  Initializes the `UIHandler` object, sets up WebRTC and signaling server handlers, and connects to the signaling server at the specified URL.The `uihandler.cpp` file plays a crucial role in managing the user interface for the voice call application. It establishes connections, handles SDP offers and answers, and manages audio streams, providing a seamless experience for initiating and answering calls through WebRTC.
+  Initializes the  UIHandler  object, sets up WebRTC and signaling server handlers, and connects to the signaling server at the specified URL.The  uihandler.cpp  file plays a crucial role in managing the user interface for the voice call application. It establishes connections, handles SDP offers and answers, and manages audio streams, providing a seamless experience for initiating and answering calls through WebRTC.
 
  Methods: 
 
 1.  offer():   
    Initiates an offer to establish a WebRTC connection:
-   - Creates an instance of `AudioInput`.
+   - Creates an instance of  AudioInput .
    - Initializes the WebRTC configuration for the "EOT-x" peer as the offerer.
-   - Connects signaling server's `sdpAnswerReceived` signal to the `setOfferSdp` slot.
-   - Connects WebRTC's `sdpGenerated` signal to send the SDP offer via the signaling server.
-   - Connects WebRTC's `trackIsOpen` signal to start the audio input.
-   - Connects `newDataAvailable` signal from `AudioInput` to send audio data to the WebRTC instance.
+   - Connects signaling server's  sdpAnswerReceived  signal to the  setOfferSdp  slot.
+   - Connects WebRTC's  sdpGenerated  signal to send the SDP offer via the signaling server.
+   - Connects WebRTC's  trackIsOpen  signal to start the audio input.
+   - Connects  newDataAvailable  signal from  AudioInput  to send audio data to the WebRTC instance.
    - Adds the peer "answerer" and generates an SDP offer.
 
 2.  answer():   
    Prepares to answer a WebRTC call:
-   - Creates an instance of `AudioOutput`.
+   - Creates an instance of  AudioOutput .
    - Initializes the WebRTC configuration for the "EOT-x" peer as the answerer.
-   - Connects WebRTC's `sdpGenerated` signal to send the SDP answer via the signaling server.
-   - Connects signaling server's `sdpOfferReceived` signal to the `setAnswerSdp` slot.
-   - Connects WebRTC's `trackIsOpen` signal to start the audio output.
-   - Connects `packetReceived` signal from WebRTC to add audio data to the `AudioOutput`.
+   - Connects WebRTC's  sdpGenerated  signal to send the SDP answer via the signaling server.
+   - Connects signaling server's  sdpOfferReceived  signal to the  setAnswerSdp  slot.
+   - Connects WebRTC's  trackIsOpen  signal to start the audio output.
+   - Connects  packetReceived  signal from WebRTC to add audio data to the  AudioOutput .
    - Emits an answer socket event to the signaling server.
    - Adds the peer "offerer".
 
