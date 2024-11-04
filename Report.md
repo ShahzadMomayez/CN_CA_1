@@ -68,6 +68,38 @@ Resource usage: Can be resource-intensive, especially for complex applications.
 Licensing: While Qt offers flexible licensing options, understanding and complying with the licensing terms can be challenging.
 
 ## STUN (Session Traversal Utilities for NAT)
+
+### What is a STUN Server?
+
+Simple Explanation
+
+STUN servers allow a client device to discover its own Public IP address.
+
+In situations where a client device is behind a NAT device usually a router, (devices behind a NAT have private IP address and all their data is routed through a single Public IP address by the NAT device usually a router)
+
+Client devices do not know what their public IP address is, they only know their private IP address
+
+These devices ping the STUN server and the STUN server replies back with the IP address and port number with which it is being pinged.
+
+This is relayed back to the NAT device first which then forwards it to the client
+
+the client device can then share the public IP and port with another device on the internet in order to establish P2P communication
+
+#### Role of the STUN Server
+
+    Discovery of Public IP and port A STUN server which is located on the internet, helps the client devices discover what their Public IP address and PORT number is.
+
+This is achieved when the client sends a request to the STUN server and when then replies back with the devices Public IP and PORT number.
+
+    Type of NAT Determination: STUN can be used to determine, client are behind what knd of NAT.
+
+This kind of information can used to establish effective communication strategies behind different kinds of NAT
+
+    Connection Establishment : One the external IP address and PORT number of the clients are known, the client then shares this information with its peer clinet and they can establish direct communication with each other using WebRTC or any other protocol.
+
+this can be useful in VoIP, video calling, online gaming, and other real-time communications.
+
+
 ####  Advantages:
 
 NAT traversal: STUN helps devices behind NAT to discover their public IP address and port, facilitating communication.
