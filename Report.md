@@ -30,6 +30,7 @@ Resource-intensive: It may require significant computational resources to handle
 Maintenance: As an open-source project, it may lack the dedicated support and regular updates that commercial solutions offer.
 
 ## Signaling Server
+![Alt text](https://github.com/ShahzadMomayez/CN_CA_1/tree/master/ReadmeFiles2/Signalingserver.png)
 ####  Advantages:
 
 Facilitates communication: Signaling servers are crucial for establishing and managing communication sessions, such as voice and video calls.
