@@ -119,7 +119,8 @@ Limited functionality: STUN alone may not be sufficient for all NAT traversal sc
 Dependence on public servers: Relies on STUN servers, which may not always be available or reliable.
 
 ## TURN (Traversal Using Relays around NAT)
-![schema](https://github.com/ShahzadMomayez/CN_CA_1/blob/master/ReadmeFiles2/"STUN vs. TURN.png")
+![schema](https://github.com/ShahzadMomayez/CN_CA_1/blob/master/ReadmeFiles2/STUN%20vs.%20TURN.png)
+
 #### Advantages:
 
 Reliable NAT traversal: TURN is used when STUN fails, providing a relay server to facilitate communication.
